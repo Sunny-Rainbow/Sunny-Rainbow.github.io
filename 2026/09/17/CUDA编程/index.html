@@ -20,15 +20,15 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="个人技术博客">
+  <meta name="description" content="add_kernel1234567891011121314151617181920212223242526272829303132#include &lt;torch&#x2F;extension.h&gt;#define CHECK_CUDA(x) TORCH_CHECK(x.device().is_cuda(), #x &quot; must be a CUDA tensor&quot;)#define">
 <meta property="og:type" content="article">
-<meta property="og:title" content="CUDA编程">
+<meta property="og:title" content="add_kernel">
 <meta property="og:url" content="http://example.com/2026/09/17/CUDA%E7%BC%96%E7%A8%8B/index.html">
 <meta property="og:site_name" content="Sunny-Rainbow&#39;s Blog">
-<meta property="og:description" content="个人技术博客">
+<meta property="og:description" content="add_kernel1234567891011121314151617181920212223242526272829303132#include &lt;torch&#x2F;extension.h&gt;#define CHECK_CUDA(x) TORCH_CHECK(x.device().is_cuda(), #x &quot; must be a CUDA tensor&quot;)#define">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-09-17T09:00:00.000Z">
-<meta property="article:modified_time" content="2026-09-17T09:16:05.580Z">
+<meta property="article:modified_time" content="2026-09-17T09:58:23.924Z">
 <meta property="article:author" content="Sunny-Rainbow">
 <meta property="article:tag" content="C++">
 <meta property="article:tag" content="cuda">
@@ -47,7 +47,7 @@
   };
 </script>
 
-  <title>CUDA编程 | Sunny-Rainbow's Blog</title>
+  <title>add_kernel | Sunny-Rainbow's Blog</title>
   
 
 
@@ -209,7 +209,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          CUDA编程
+          add_kernel
         </h1>
 
         <div class="post-meta">
@@ -220,7 +220,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2026-09-17 17:00:00 / 修改时间：17:16:05" itemprop="dateCreated datePublished" datetime="2026-09-17T17:00:00+08:00">2026-09-17</time>
+              <time title="创建时间：2026-09-17 17:00:00 / 修改时间：17:58:23" itemprop="dateCreated datePublished" datetime="2026-09-17T17:00:00+08:00">2026-09-17</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -243,7 +243,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        
+        <h1 id="add-kernel"><a href="#add-kernel" class="headerlink" title="add_kernel"></a>add_kernel</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;torch/extension.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CHECK_CUDA(x) TORCH_CHECK(x.device().is_cuda(), #x <span class="string">&quot; must be a CUDA tensor&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CHECK_CONTIGUOUS(x) TORCH_CHECK(x.is_contiguous(), #x <span class="string">&quot; must be contiguous&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CHECK_INPUT(x)                                                                                                 \</span></span><br><span class="line"><span class="meta">  CHECK_CUDA(x);                                                                                                       \</span></span><br><span class="line"><span class="meta">  CHECK_CONTIGUOUS(x)</span></span><br><span class="line"></span><br><span class="line"><span class="function">__global__ <span class="type">void</span> <span class="title">add_kernel</span><span class="params">(<span class="type">const</span> <span class="type">float</span> *input1, <span class="type">const</span> <span class="type">float</span> *input2, <span class="type">float</span> *output, <span class="type">int</span> size)</span> </span>&#123;</span><br><span class="line">  <span class="type">const</span> <span class="type">int</span> idx = blockIdx.x * blockDim.x + threadIdx.x;</span><br><span class="line">  <span class="keyword">if</span> (idx &lt; size)</span><br><span class="line">    output[idx] = input1[idx] + input2[idx];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">torch::Tensor <span class="title">add</span><span class="params">(torch::Tensor input1, torch::Tensor input2)</span> </span>&#123;</span><br><span class="line">  <span class="built_in">CHECK_INPUT</span>(input1);</span><br><span class="line">  <span class="built_in">CHECK_INPUT</span>(input2);</span><br><span class="line">  <span class="type">int</span> size = input1.<span class="built_in">numel</span>();</span><br><span class="line">  <span class="built_in">TORCH_CHECK</span>(size == input2.<span class="built_in">numel</span>(), <span class="string">&quot;input1 and input2 must have the same size&quot;</span>);</span><br><span class="line">  torch::Tensor output = torch::<span class="built_in">empty</span>(size, input1.<span class="built_in">options</span>());</span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> n_threads = <span class="number">256</span>;</span><br><span class="line">  <span class="type">int</span> n_blocks = (size + n_threads - <span class="number">1</span>) / n_threads;</span><br><span class="line">  add_kernel&lt;&lt;&lt;n_blocks, n_threads&gt;&gt;&gt;(input1.<span class="built_in">data_ptr</span>&lt;<span class="type">float</span>&gt;(), input2.<span class="built_in">data_ptr</span>&lt;<span class="type">float</span>&gt;(), output.<span class="built_in">data_ptr</span>&lt;<span class="type">float</span>&gt;(),</span><br><span class="line">                                      size);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> output;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">PYBIND11_MODULE</span>(TORCH_EXTENSION_NAME, m) &#123; m.<span class="built_in">def</span>(<span class="string">&quot;add&quot;</span>, &amp;add, <span class="string">&quot;Add two vectors&quot;</span>); &#125;</span><br></pre></td></tr></table></figure>
+
     </div>
 
     
@@ -333,6 +334,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#add-kernel"><span class="nav-number">1.</span> <span class="nav-text">add_kernel</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
