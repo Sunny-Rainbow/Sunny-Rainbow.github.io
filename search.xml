@@ -1,15 +1,1296 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>（登录和状态服务）01-客户端篇</title>
+    <url>/2026/09/18/01-%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%AF%87/</url>
+    <content><![CDATA[<h1 id="01-·-客户端篇（Qt-chat-）"><a href="#01-·-客户端篇（Qt-chat-）" class="headerlink" title="01 · 客户端篇（Qt chat/）"></a>01 · 客户端篇（Qt <code>chat/</code>）</h1><p>本文先讲<strong>模块联系与职责</strong>，再按<strong>关键代码块</strong>逐段说明。<br>客户端只通过 HTTP 访问 GateServer，不直接连 VarifyServer &#x2F; StatusServer。</p>
+<hr>
+<h2 id="一、模块联系"><a href="#一、模块联系" class="headerlink" title="一、模块联系"></a>一、模块联系</h2><h3 id="1-1-关系总图"><a href="#1-1-关系总图" class="headerlink" title="1.1 关系总图"></a>1.1 关系总图</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">main.cpp</span><br><span class="line">  │ 读 config.ini → gate_url_prefix</span><br><span class="line">  │ 加载 QSS</span><br><span class="line">  ▼</span><br><span class="line">MainWindow  ──────────────────────────────┐</span><br><span class="line">  │ setCentralWidget                      │ 页面切换</span><br><span class="line">  ├─ LoginDialog                          │</span><br><span class="line">  │     │ switchRegister / switchReset    │</span><br><span class="line">  ├─ RegisterDialog ◄─────────────────────┤</span><br><span class="line">  │     │ sigSwitchLogin                  │</span><br><span class="line">  └─ ResetDialog ─────────────────────────┘</span><br><span class="line">        │ switchLogin</span><br><span class="line"></span><br><span class="line">所有对话框业务请求都走：</span><br><span class="line">  Dialog ──PostHttpReq──► HttpMgr(单例)</span><br><span class="line">                            │ QNetworkAccessManager</span><br><span class="line">                            ▼</span><br><span class="line">                         GateServer</span><br><span class="line">                            │</span><br><span class="line">              sig_http_finish → 按 Modules 分发</span><br><span class="line">                            │</span><br><span class="line">         ┌──────────────────┼──────────────────┐</span><br><span class="line">         ▼                  ▼                  ▼</span><br><span class="line">  sig_reg_mod_finish  sig_login_mod_finish  sig_reset_mod_finish</span><br><span class="line">         │                  │                  │</span><br><span class="line">   RegisterDialog      LoginDialog        ResetDialog</span><br><span class="line">         └──── _handlers[ReqId] 处理 JSON ─────┘</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-协作要点"><a href="#1-2-协作要点" class="headerlink" title="1.2 协作要点"></a>1.2 协作要点</h3><table>
+<thead>
+<tr>
+<th>关系</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MainWindow ↔ Dialogs</td>
+<td>用 <code>setCentralWidget</code> 切换登录&#x2F;注册&#x2F;重置页；信号驱动导航</td>
+</tr>
+<tr>
+<td>Dialogs ↔ HttpMgr</td>
+<td>对话框发请求；HttpMgr 异步回包后再按模块发信号</td>
+</tr>
+<tr>
+<td>ReqId</td>
+<td>同一模块内区分「获取验证码 &#x2F; 注册 &#x2F; 登录」等不同接口</td>
+</tr>
+<tr>
+<td>Modules</td>
+<td>区分回包该交给注册页、登录页还是重置页</td>
+</tr>
+<tr>
+<td>global</td>
+<td>共享 <code>gate_url_prefix</code>、<code>xorString</code>、枚举、<code>repolish</code></td>
+</tr>
+<tr>
+<td>ClickedLabel &#x2F; TimerBtn</td>
+<td>UI 增强：可点击标签、带倒计时按钮</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="二、各模块功能"><a href="#二、各模块功能" class="headerlink" title="二、各模块功能"></a>二、各模块功能</h2><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>main.cpp</code></td>
+<td>程序入口：样式、读配置、创建主窗口</td>
+</tr>
+<tr>
+<td><code>mainwindow.*</code></td>
+<td>壳窗口：持有并切换三个对话框</td>
+</tr>
+<tr>
+<td><code>logindialog.*</code></td>
+<td>登录：校验、发 <code>/user_login</code>、解析 token&#x2F;host</td>
+</tr>
+<tr>
+<td><code>registerdialog.*</code></td>
+<td>注册：获取验证码、提交注册、成功页倒计时</td>
+</tr>
+<tr>
+<td><code>resetdialog.*</code></td>
+<td>重置密码：获取验证码、提交 <code>/reset_pwd</code></td>
+</tr>
+<tr>
+<td><code>httpmgr.*</code></td>
+<td>HTTP 单例：POST JSON、按模块分发回包</td>
+</tr>
+<tr>
+<td><code>singleton.h</code></td>
+<td>线程安全单例模板</td>
+</tr>
+<tr>
+<td><code>global.h/.cpp</code></td>
+<td>全局枚举、前缀 URL、密码异或、刷新样式</td>
+</tr>
+<tr>
+<td><code>clickedlabel.*</code></td>
+<td>可点击、带 Normal&#x2F;Selected 状态的 Label</td>
+</tr>
+<tr>
+<td><code>timerbtn.*</code></td>
+<td>点击后自动倒计时的按钮（重置页验证码按钮）</td>
+</tr>
+<tr>
+<td><code>config.ini</code></td>
+<td>GateServer 的 host&#x2F;port</td>
+</tr>
+<tr>
+<td><code>*.ui</code></td>
+<td>Qt Designer 界面布局</td>
+</tr>
+</tbody></table>
+<h3 id="重要枚举（global-h）"><a href="#重要枚举（global-h）" class="headerlink" title="重要枚举（global.h）"></a>重要枚举（<code>global.h</code>）</h3><table>
+<thead>
+<tr>
+<th>枚举</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ReqId</code></td>
+<td>请求类型：1001 验证码、1002 注册、1003 重置、1004 登录…</td>
+</tr>
+<tr>
+<td><code>Modules</code></td>
+<td>REGISTERMOD &#x2F; RESETMOD &#x2F; LOGINMOD</td>
+</tr>
+<tr>
+<td><code>ErrorCodes</code></td>
+<td>客户端传输层：SUCCESS &#x2F; ERR_JSON &#x2F; ERR_NETWORK</td>
+</tr>
+<tr>
+<td><code>TipErr</code></td>
+<td>表单字段错误提示分类</td>
+</tr>
+<tr>
+<td><code>ServerInfo</code></td>
+<td>登录成功后的 Host&#x2F;Port&#x2F;Token&#x2F;Uid（给后续 TCP 用）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="三、代码讲解"><a href="#三、代码讲解" class="headerlink" title="三、代码讲解"></a>三、代码讲解</h2><h3 id="3-1-启动：读配置并拼出网关地址"><a href="#3-1-启动：读配置并拼出网关地址" class="headerlink" title="3.1 启动：读配置并拼出网关地址"></a>3.1 启动：读配置并拼出网关地址</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// main.cpp</span></span><br><span class="line"><span class="function">QSettings <span class="title">settings</span><span class="params">(config_path, QSettings::IniFormat)</span></span>;</span><br><span class="line">QString gate_host = settings.<span class="built_in">value</span>(<span class="string">&quot;GateServer/host&quot;</span>).<span class="built_in">toString</span>();</span><br><span class="line">QString gate_port = settings.<span class="built_in">value</span>(<span class="string">&quot;GateServer/port&quot;</span>).<span class="built_in">toString</span>();</span><br><span class="line">gate_url_prefix = <span class="string">&quot;http://&quot;</span>+gate_host+<span class="string">&quot;:&quot;</span>+gate_port;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>配置文件在可执行文件目录下的 <code>config.ini</code>（qmake 会拷贝）。</li>
+<li>全局变量 <code>gate_url_prefix</code> 后面所有请求都拼在它后面，例如 <code>/user_login</code>。</li>
+</ul>
+<hr>
+<h3 id="3-2-主窗口：登录-注册切换"><a href="#3-2-主窗口：登录-注册切换" class="headerlink" title="3.2 主窗口：登录 &#x2F; 注册切换"></a>3.2 主窗口：登录 &#x2F; 注册切换</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// mainwindow.cpp 构造</span></span><br><span class="line">_login_dlg = <span class="keyword">new</span> <span class="built_in">LoginDialog</span>();</span><br><span class="line"><span class="built_in">setCentralWidget</span>(_login_dlg);</span><br><span class="line"><span class="built_in">connect</span>(_login_dlg, &amp;LoginDialog::switchRegister,</span><br><span class="line">        <span class="keyword">this</span>, &amp;MainWindow::SlotSwitchReg);</span><br><span class="line"><span class="built_in">connect</span>(_login_dlg, &amp;LoginDialog::switchReset,</span><br><span class="line">        <span class="keyword">this</span>, &amp;MainWindow::SlotSwitchReset);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">MainWindow::SlotSwitchReg</span><span class="params">()</span></span>&#123;</span><br><span class="line">    _reg_dlg = <span class="keyword">new</span> <span class="built_in">RegisterDialog</span>();</span><br><span class="line">    <span class="built_in">connect</span>(_reg_dlg, &amp;RegisterDialog::sigSwitchLogin,</span><br><span class="line">            <span class="keyword">this</span>, &amp;MainWindow::SlotSwitchLogin);</span><br><span class="line">    <span class="built_in">setCentralWidget</span>(_reg_dlg);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li><code>MainWindow</code> 本身几乎没有业务，只做<strong>页面路由</strong>。</li>
+<li><code>setCentralWidget</code> 后旧中心部件由 Qt 接管生命周期，需注意指针不再随意 delete。</li>
+<li>从注册返回登录会<strong>重新 new LoginDialog</strong>，并重新 connect 信号。</li>
+</ul>
+<hr>
+<h3 id="3-3-单例-HttpMgr"><a href="#3-3-单例-HttpMgr" class="headerlink" title="3.3 单例 HttpMgr"></a>3.3 单例 HttpMgr</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// singleton.h</span></span><br><span class="line"><span class="function"><span class="type">static</span> std::shared_ptr&lt;T&gt; <span class="title">GetInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">static</span> std::once_flag s_flag;</span><br><span class="line">    std::<span class="built_in">call_once</span>(s_flag, [&amp;]() &#123;</span><br><span class="line">        _instance = <span class="built_in">shared_ptr</span>&lt;T&gt;(<span class="keyword">new</span> T);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span> _instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// httpmgr.h</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">HttpMgr</span>: <span class="keyword">public</span> QObject, <span class="keyword">public</span> Singleton&lt;HttpMgr&gt;,</span><br><span class="line">               <span class="keyword">public</span> std::enable_shared_from_this&lt;HttpMgr&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>全进程一个 <code>HttpMgr</code>，内部一个 <code>QNetworkAccessManager</code>。</li>
+<li><code>enable_shared_from_this</code>：异步 lambda 里安全持有 <code>self</code>，避免对象提前析构。</li>
+</ul>
+<hr>
+<h3 id="3-4-发-POST-与回包分发"><a href="#3-4-发-POST-与回包分发" class="headerlink" title="3.4 发 POST 与回包分发"></a>3.4 发 POST 与回包分发</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">HttpMgr::PostHttpReq</span><span class="params">(QUrl url, QJsonObject json, ReqId req_id, Modules mod)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    QByteArray data = <span class="built_in">QJsonDocument</span>(json).<span class="built_in">toJson</span>();</span><br><span class="line">    <span class="function">QNetworkRequest <span class="title">request</span><span class="params">(url)</span></span>;</span><br><span class="line">    request.<span class="built_in">setHeader</span>(QNetworkRequest::ContentTypeHeader, <span class="string">&quot;application/json&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> self = <span class="built_in">shared_from_this</span>();</span><br><span class="line">    QNetworkReply * reply = _manager.<span class="built_in">post</span>(request, data);</span><br><span class="line"></span><br><span class="line">    QObject::<span class="built_in">connect</span>(reply, &amp;QNetworkReply::finished, [reply, self, req_id, mod]()&#123;</span><br><span class="line">        <span class="keyword">if</span>(reply-&gt;<span class="built_in">error</span>() != QNetworkReply::NoError)&#123;</span><br><span class="line">            emit self-&gt;<span class="built_in">sig_http_finish</span>(req_id, <span class="string">&quot;&quot;</span>, ErrorCodes::ERR_NETWORK, mod);</span><br><span class="line">            reply-&gt;deleteLater();</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        QString res = reply-&gt;<span class="built_in">readAll</span>();</span><br><span class="line">        emit self-&gt;<span class="built_in">sig_http_finish</span>(req_id, res, ErrorCodes::SUCCESS, mod);</span><br><span class="line">        reply-&gt;deleteLater();</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">HttpMgr::slot_http_finish</span><span class="params">(ReqId id, QString res, ErrorCodes err, Modules mod)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(mod == Modules::REGISTERMOD)</span><br><span class="line">        <span class="function">emit <span class="title">sig_reg_mod_finish</span><span class="params">(id, res, err)</span></span>;</span><br><span class="line">    <span class="keyword">if</span>(mod == Modules::RESETMOD)</span><br><span class="line">        <span class="function">emit <span class="title">sig_reset_mod_finish</span><span class="params">(id, res, err)</span></span>;</span><br><span class="line">    <span class="keyword">if</span>(mod == Modules::LOGINMOD)</span><br><span class="line">        <span class="function">emit <span class="title">sig_login_mod_finish</span><span class="params">(id, res, err)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li><code>ReqId</code>：告诉对话框「这是哪次业务请求的回包」。</li>
+<li><code>Modules</code>：告诉 HttpMgr「回包发给哪个界面」。</li>
+<li>两级分发避免所有页面都监听同一个信号、互相误处理。</li>
+</ul>
+<hr>
+<h3 id="3-5-获取验证码（注册页）"><a href="#3-5-获取验证码（注册页）" class="headerlink" title="3.5 获取验证码（注册页）"></a>3.5 获取验证码（注册页）</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">RegisterDialog::on_get_code_Button_clicked</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> email = ui-&gt;email_edit-&gt;<span class="built_in">text</span>();</span><br><span class="line">    <span class="function">QRegularExpression <span class="title">regex</span><span class="params">(<span class="string">R&quot;((\w+)(\.|_)?(\w*)@(\w+)(\.(\w+))+)&quot;</span>)</span></span>;</span><br><span class="line">    <span class="keyword">if</span>(regex.<span class="built_in">match</span>(email).<span class="built_in">hasMatch</span>())&#123;</span><br><span class="line">        QJsonObject json_obj;</span><br><span class="line">        json_obj[<span class="string">&quot;email&quot;</span>] = email;</span><br><span class="line">        HttpMgr::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">PostHttpReq</span>(</span><br><span class="line">            <span class="built_in">QUrl</span>(gate_url_prefix+<span class="string">&quot;/get_varifycode&quot;</span>),</span><br><span class="line">            json_obj, ReqId::ID_GET_VARIFY_CODE, Modules::REGISTERMOD);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">showTip</span>(<span class="built_in">tr</span>(<span class="string">&quot;邮箱地址不正确&quot;</span>), <span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>成功回包后：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">_handlers.<span class="built_in">insert</span>(ReqId::ID_GET_VARIFY_CODE, [<span class="keyword">this</span>](QJsonObject jsonObj)&#123;</span><br><span class="line">    <span class="keyword">if</span>(jsonObj[<span class="string">&quot;error&quot;</span>].<span class="built_in">toInt</span>() != ErrorCodes::SUCCESS)&#123;</span><br><span class="line">        <span class="built_in">showTip</span>(<span class="built_in">tr</span>(<span class="string">&quot;参数错误&quot;</span>), <span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">showTip</span>(<span class="built_in">tr</span>(<span class="string">&quot;验证码已发送到邮箱，注意查收&quot;</span>), <span class="literal">true</span>);</span><br><span class="line">    <span class="built_in">startCodeCountdown</span>();  <span class="comment">// 禁用按钮并 60s 倒计时</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>请求体只有 <code>email</code>。</li>
+<li>服务端业务错误也在 JSON 的 <code>error</code> 字段；客户端这里统一显示「参数错误」（提示文案较粗）。</li>
+</ul>
+<hr>
+<h3 id="3-6-注册提交"><a href="#3-6-注册提交" class="headerlink" title="3.6 注册提交"></a>3.6 注册提交</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">json_obj[<span class="string">&quot;user&quot;</span>] = ui-&gt;user_edit-&gt;<span class="built_in">text</span>();</span><br><span class="line">json_obj[<span class="string">&quot;email&quot;</span>] = ui-&gt;email_edit-&gt;<span class="built_in">text</span>();</span><br><span class="line">json_obj[<span class="string">&quot;passwd&quot;</span>] = xorString(ui-&gt;pass_edit-&gt;<span class="built_in">text</span>());</span><br><span class="line">json_obj[<span class="string">&quot;confirm&quot;</span>] = xorString(ui-&gt;confirm_edit-&gt;<span class="built_in">text</span>());</span><br><span class="line">json_obj[<span class="string">&quot;varifycode&quot;</span>] = ui-&gt;varify_edit-&gt;<span class="built_in">text</span>();</span><br><span class="line">HttpMgr::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">PostHttpReq</span>(</span><br><span class="line">    <span class="built_in">QUrl</span>(gate_url_prefix+<span class="string">&quot;/user_register&quot;</span>),</span><br><span class="line">    json_obj, ReqId::ID_REG_USER, Modules::REGISTERMOD);</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>密码传输前做 <code>xorString</code> 简单混淆（与登录一致，库中存的也是异或后的值）。</li>
+<li>成功后应调用 <code>ChangeTipPage()</code> 切到 <code>page_2</code> 并倒计时返回登录。</li>
+</ul>
+<hr>
+<h3 id="3-7-登录"><a href="#3-7-登录" class="headerlink" title="3.7 登录"></a>3.7 登录</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">LoginDialog::on_login_btn_clicked</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> email = ui-&gt;email_edit-&gt;<span class="built_in">text</span>();</span><br><span class="line">    <span class="keyword">auto</span> pwd = ui-&gt;pass_edit-&gt;<span class="built_in">text</span>();</span><br><span class="line">    QJsonObject json_obj;</span><br><span class="line">    json_obj[<span class="string">&quot;email&quot;</span>] = email;</span><br><span class="line">    json_obj[<span class="string">&quot;passwd&quot;</span>] = xorString(pwd);</span><br><span class="line">    HttpMgr::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">PostHttpReq</span>(</span><br><span class="line">        <span class="built_in">QUrl</span>(gate_url_prefix+<span class="string">&quot;/user_login&quot;</span>),</span><br><span class="line">        json_obj, ReqId::ID_LOGIN_USER, Modules::LOGINMOD);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>成功处理中会组装 <code>ServerInfo</code>（uid&#x2F;host&#x2F;port&#x2F;token），并发出 <code>sig_connect_tcp</code>——当前工程里<strong>后续 TCP 聊天连接可能尚未完全接上</strong>，属于下一阶段。</p>
+<hr>
+<h3 id="3-8-密码异或"><a href="#3-8-密码异或" class="headerlink" title="3.8 密码异或"></a>3.8 密码异或</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// global.cpp</span></span><br><span class="line">std::function&lt;QString(QString)&gt; xorString = [](QString input)&#123;</span><br><span class="line">    QString result = input;</span><br><span class="line">    <span class="type">int</span> length = input.<span class="built_in">length</span>() % <span class="number">255</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; length; ++i) &#123;</span><br><span class="line">        result[i] = <span class="built_in">QChar</span>(<span class="keyword">static_cast</span>&lt;ushort&gt;(</span><br><span class="line">            input[i].<span class="built_in">unicode</span>() ^ <span class="keyword">static_cast</span>&lt;ushort&gt;(length)));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>这是教学用混淆，不是安全加密；生产应使用加盐哈希（如 bcrypt）。</li>
+<li>注册、登录、重置必须同一套算法，否则会出现「密码明明对却校验失败」。</li>
+</ul>
+<hr>
+<h2 id="四、客户端自测清单"><a href="#四、客户端自测清单" class="headerlink" title="四、客户端自测清单"></a>四、客户端自测清单</h2><ol>
+<li><code>config.ini</code> 是否在运行目录，且 host&#x2F;port 指向 GateServer？  </li>
+<li>获取验证码后按钮是否进入倒计时？  </li>
+<li>注册成功是否切到 <code>page_2</code>？  </li>
+<li>登录发的是 <code>email</code> + <code>xorString(passwd)</code>，不是明文用户名？  </li>
+<li>HttpMgr 回包是否按 Modules 进了正确对话框？</li>
+</ol>
+<hr>
+<p>下一篇：<a href="./02-%E7%BD%91%E5%85%B3%E7%AF%87.md">02-网关篇</a></p>
+]]></content>
+      <categories>
+        <category>全栈聊天项目</category>
+      </categories>
+      <tags>
+        <tag>全栈聊天项目</tag>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>04-状态服务篇</title>
+    <url>/2026/09/18/04-%E7%8A%B6%E6%80%81%E6%9C%8D%E5%8A%A1%E7%AF%87/</url>
+    <content><![CDATA[<h1 id="04-·-状态服务篇（StatusServer-）"><a href="#04-·-状态服务篇（StatusServer-）" class="headerlink" title="04 · 状态服务篇（StatusServer/）"></a>04 · 状态服务篇（<code>StatusServer/</code>）</h1><p>StatusServer 负责：<strong>登录成功后，给用户分配一台 ChatServer，并签发 Token</strong>。<br>GateServer 在 <code>/user_login</code> 验密通过后，通过 gRPC 调用它。</p>
+<hr>
+<h2 id="一、模块联系"><a href="#一、模块联系" class="headerlink" title="一、模块联系"></a>一、模块联系</h2><h3 id="1-1-关系总图"><a href="#1-1-关系总图" class="headerlink" title="1.1 关系总图"></a>1.1 关系总图</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">GateServer::/user_login</span><br><span class="line">    │ CheckPwd 成功</span><br><span class="line">    ▼</span><br><span class="line">StatusGrpcClient.GetChatServer(uid)</span><br><span class="line">    │ gRPC :50052</span><br><span class="line">    ▼</span><br><span class="line">StatusServer.cpp</span><br><span class="line">    └─ StatusServiceImpl</span><br><span class="line">          ├─ 构造：从 config.ini 加载 chatserver1/2 ...</span><br><span class="line">          ├─ getChatServer()     选一台（当前取 map 第一台）</span><br><span class="line">          ├─ generate_unique_string()  Boost UUID → token</span><br><span class="line">          └─ insertToken(uid, token) → Redis  SET utoken_&lt;uid&gt;</span><br><span class="line">                │</span><br><span class="line">                ▼</span><br><span class="line">         返回 &#123; host, port, token, error &#125;</span><br><span class="line">                │</span><br><span class="line">                ▼</span><br><span class="line">         Gate 再把结果 JSON 给 Qt 客户端</span><br><span class="line">                │</span><br><span class="line">                ▼（后续阶段）</span><br><span class="line">         客户端拿 token 去连 ChatServer</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-协作要点"><a href="#1-2-协作要点" class="headerlink" title="1.2 协作要点"></a>1.2 协作要点</h3><table>
+<thead>
+<tr>
+<th>关系</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Gate → Status</td>
+<td>仅登录成功后调 <code>GetChatServer</code></td>
+</tr>
+<tr>
+<td>Status → Redis</td>
+<td>写入 <code>utoken_&lt;uid&gt;</code>，供 ChatServer &#x2F; Login RPC 校验</td>
+</tr>
+<tr>
+<td>Status ↔ ChatServer 列表</td>
+<td>来自 <code>config.ini</code> 的 <code>[chatservers]</code></td>
+</tr>
+<tr>
+<td>负载均衡</td>
+<td>按 Redis <code>logincount</code> 选最少连接的逻辑已写但<strong>被注释</strong>，当前固定返回第一台</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="二、各模块功能"><a href="#二、各模块功能" class="headerlink" title="二、各模块功能"></a>二、各模块功能</h2><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>StatusServer.cpp</code></td>
+<td>启动 gRPC、注册服务、信号处理退出</td>
+</tr>
+<tr>
+<td><code>StatusServiceImpl.*</code></td>
+<td>实现 <code>GetChatServer</code> &#x2F; <code>Login</code>；选服、发 token</td>
+</tr>
+<tr>
+<td><code>message.proto</code></td>
+<td><code>StatusService</code> 定义</td>
+</tr>
+<tr>
+<td><code>ConfigMgr.*</code></td>
+<td>读 <code>config.ini</code></td>
+</tr>
+<tr>
+<td><code>RedisMgr.*</code></td>
+<td>Redis 连接池；存 token</td>
+</tr>
+<tr>
+<td><code>DistLock.*</code></td>
+<td>Redis 分布式锁（扩展用）</td>
+</tr>
+<tr>
+<td><code>ChatGrpcClient.*</code></td>
+<td>向 ChatServer 发通知类 RPC（非登录主路径）</td>
+</tr>
+<tr>
+<td><code>const.h</code></td>
+<td><code>USERTOKENPREFIX=&quot;utoken_&quot;</code>、错误码等</td>
+</tr>
+<tr>
+<td><code>config.ini</code></td>
+<td>监听地址、Redis、多台 chatserver</td>
+</tr>
+</tbody></table>
+<h3 id="配置示例"><a href="#配置示例" class="headerlink" title="配置示例"></a>配置示例</h3><figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="section">[StatusServer]</span></span><br><span class="line"><span class="attr">Port</span> = <span class="number">50052</span></span><br><span class="line"><span class="attr">Host</span> = <span class="number">0.0</span>.<span class="number">0.0</span></span><br><span class="line"></span><br><span class="line"><span class="section">[chatservers]</span></span><br><span class="line"><span class="attr">Name</span> = chatserver1,chatserver2</span><br><span class="line"></span><br><span class="line"><span class="section">[chatserver1]</span></span><br><span class="line"><span class="attr">Name</span> = chatserver1</span><br><span class="line"><span class="attr">Host</span> = <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"><span class="attr">Port</span> = <span class="number">8990</span></span><br><span class="line"></span><br><span class="line"><span class="section">[chatserver2]</span></span><br><span class="line"><span class="attr">Name</span> = chatserver2</span><br><span class="line"><span class="attr">Host</span> = <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"><span class="attr">Port</span> = <span class="number">8991</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Redis-Key"><a href="#Redis-Key" class="headerlink" title="Redis Key"></a>Redis Key</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">utoken_&lt;uid&gt;  =  登录 token（UUID 字符串）</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="三、代码讲解"><a href="#三、代码讲解" class="headerlink" title="三、代码讲解"></a>三、代码讲解</h2><h3 id="3-1-服务启动"><a href="#3-1-服务启动" class="headerlink" title="3.1 服务启动"></a>3.1 服务启动</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">RunServer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> &amp; cfg = ConfigMgr::<span class="built_in">GetInstance</span>();</span><br><span class="line">    <span class="function">std::string <span class="title">server_address</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        cfg[<span class="string">&quot;StatusServer&quot;</span>][<span class="string">&quot;Host&quot;</span>] + <span class="string">&quot;:&quot;</span> + cfg[<span class="string">&quot;StatusServer&quot;</span>][<span class="string">&quot;Port&quot;</span>])</span></span>;</span><br><span class="line"></span><br><span class="line">    StatusServiceImpl service;</span><br><span class="line">    grpc::ServerBuilder builder;</span><br><span class="line">    builder.<span class="built_in">AddListeningPort</span>(server_address, grpc::<span class="built_in">InsecureServerCredentials</span>());</span><br><span class="line">    builder.<span class="built_in">RegisterService</span>(&amp;service);</span><br><span class="line"></span><br><span class="line">    <span class="function">std::unique_ptr&lt;grpc::Server&gt; <span class="title">server</span><span class="params">(builder.BuildAndStart())</span></span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;Server listening on &quot;</span> &lt;&lt; server_address &lt;&lt; std::endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 另开线程跑 io_context，用于捕获 Ctrl+C 优雅 Shutdown</span></span><br><span class="line">    server-&gt;<span class="built_in">Wait</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>Host 常用 <code>0.0.0.0</code> 表示监听所有网卡；Gate 侧配置连 <code>127.0.0.1:50052</code>。  </li>
+<li><code>Insecure</code> 同样仅适合学习环境。</li>
+</ul>
+<hr>
+<h3 id="3-2-构造：加载聊天服列表"><a href="#3-2-构造：加载聊天服列表" class="headerlink" title="3.2 构造：加载聊天服列表"></a>3.2 构造：加载聊天服列表</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">StatusServiceImpl::<span class="built_in">StatusServiceImpl</span>()</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">auto</span>&amp; cfg = ConfigMgr::<span class="built_in">GetInstance</span>();</span><br><span class="line">    <span class="keyword">auto</span> server_list = cfg[<span class="string">&quot;chatservers&quot;</span>][<span class="string">&quot;Name&quot;</span>];  <span class="comment">// &quot;chatserver1,chatserver2&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="function">std::stringstream <span class="title">ss</span><span class="params">(server_list)</span></span>;</span><br><span class="line">    std::string word;</span><br><span class="line">    <span class="keyword">while</span> (std::<span class="built_in">getline</span>(ss, word, <span class="string">&#x27;,&#x27;</span>)) &#123;</span><br><span class="line">        ChatServer server;</span><br><span class="line">        server.port = cfg[word][<span class="string">&quot;Port&quot;</span>];</span><br><span class="line">        server.host = cfg[word][<span class="string">&quot;Host&quot;</span>];</span><br><span class="line">        server.name = cfg[word][<span class="string">&quot;Name&quot;</span>];</span><br><span class="line">        _servers[server.name] = server;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>名字列表用逗号分隔，再逐个 section 读 Host&#x2F;Port。  </li>
+<li>结果放进 <code>_servers</code> map，供分配使用。</li>
+</ul>
+<hr>
+<h3 id="3-3-GetChatServer：分配-发-Token"><a href="#3-3-GetChatServer：分配-发-Token" class="headerlink" title="3.3 GetChatServer：分配 + 发 Token"></a>3.3 GetChatServer：分配 + 发 Token</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">Status <span class="title">StatusServiceImpl::GetChatServer</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    ServerContext* context,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="type">const</span> GetChatServerReq* request,</span></span></span><br><span class="line"><span class="params"><span class="function">    GetChatServerRsp* reply)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">const</span> <span class="keyword">auto</span>&amp; server = <span class="built_in">getChatServer</span>();</span><br><span class="line">    reply-&gt;<span class="built_in">set_host</span>(server.host);</span><br><span class="line">    reply-&gt;<span class="built_in">set_port</span>(server.port);</span><br><span class="line">    reply-&gt;<span class="built_in">set_error</span>(ErrorCodes::Success);</span><br><span class="line">    reply-&gt;<span class="built_in">set_token</span>(<span class="built_in">generate_unique_string</span>());</span><br><span class="line">    <span class="built_in">insertToken</span>(request-&gt;<span class="built_in">uid</span>(), reply-&gt;<span class="built_in">token</span>());</span><br><span class="line">    <span class="keyword">return</span> Status::OK;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">std::string <span class="title">generate_unique_string</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    boost::uuids::uuid uuid = boost::uuids::<span class="built_in">random_generator</span>()();</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">to_string</span>(uuid);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">StatusServiceImpl::insertToken</span><span class="params">(<span class="type">int</span> uid, std::string token)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::string token_key = USERTOKENPREFIX + std::<span class="built_in">to_string</span>(uid);</span><br><span class="line">    RedisMgr::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">Set</span>(token_key, token);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ol>
+<li>选一台 ChatServer；  </li>
+<li>生成 UUID token；  </li>
+<li>Redis 记下 <code>utoken_&lt;uid&gt;</code>；  </li>
+<li>把 host&#x2F;port&#x2F;token 回给 Gate → 客户端。</li>
+</ol>
+<hr>
+<h3 id="3-4-如何选服（当前-vs-设计）"><a href="#3-4-如何选服（当前-vs-设计）" class="headerlink" title="3.4 如何选服（当前 vs 设计）"></a>3.4 如何选服（当前 vs 设计）</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">ChatServer <span class="title">StatusServiceImpl::getChatServer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="function">std::lock_guard&lt;std::mutex&gt; <span class="title">guard</span><span class="params">(_server_mtx)</span></span>;</span><br><span class="line">    <span class="keyword">auto</span> minServer = _servers.<span class="built_in">begin</span>()-&gt;second;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 下面大段被注释：本意是读 Redis hash logincount，</span></span><br><span class="line">    <span class="comment">// 选 con_count 最小的那台 ChatServer，做简单负载均衡。</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> minServer;  <span class="comment">// 当前：始终返回 map 中第一台</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>学习时要分清「代码意图」和「当前生效行为」。  </li>
+<li>要启用负载均衡，需 ChatServer 上报连接数到 Redis，并取消注释比较逻辑。</li>
+</ul>
+<hr>
+<h3 id="3-5-Login-RPC（校验-token）"><a href="#3-5-Login-RPC（校验-token）" class="headerlink" title="3.5 Login RPC（校验 token）"></a>3.5 Login RPC（校验 token）</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">Status <span class="title">StatusServiceImpl::Login</span><span class="params">(..., <span class="type">const</span> LoginReq* request, LoginRsp* reply)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> uid = request-&gt;<span class="built_in">uid</span>();</span><br><span class="line">    <span class="keyword">auto</span> token = request-&gt;<span class="built_in">token</span>();</span><br><span class="line">    std::string token_key = USERTOKENPREFIX + std::<span class="built_in">to_string</span>(uid);</span><br><span class="line">    std::string token_value;</span><br><span class="line">    <span class="type">bool</span> success = RedisMgr::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">Get</span>(token_key, token_value);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (success) &#123;</span><br><span class="line">        reply-&gt;<span class="built_in">set_error</span>(ErrorCodes::UidInvalid);</span><br><span class="line">        <span class="keyword">return</span> Status::OK;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>学习提示：</strong></p>
+<ul>
+<li>这段 <code>if (success)</code> 的分支语义看起来与「找到 key 应成功」相反，更像是笔误或未完成逻辑。  </li>
+<li>阅读时建议对照 ChatServer 实际登录校验方式，以「谁读 <code>utoken_</code>」为准。  </li>
+<li>Gate 登录主路径目前主要用的是 <code>GetChatServer</code>，不一定走到这个 <code>Login</code> RPC。</li>
+</ul>
+<hr>
+<h3 id="3-6-Proto-契约"><a href="#3-6-Proto-契约" class="headerlink" title="3.6 Proto 契约"></a>3.6 Proto 契约</h3><figure class="highlight protobuf"><table><tr><td class="code"><pre><span class="line"><span class="keyword">service </span><span class="title class_">StatusService</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">rpc</span> GetChatServer (GetChatServerReq) <span class="keyword">returns</span> (GetChatServerRsp) </span>&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">message </span><span class="title class_">GetChatServerReq</span> &#123;</span><br><span class="line">  <span class="type">int32</span> uid = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">message </span><span class="title class_">GetChatServerRsp</span> &#123;</span><br><span class="line">  <span class="type">int32</span> error = <span class="number">1</span>;</span><br><span class="line">  <span class="type">string</span> host = <span class="number">2</span>;</span><br><span class="line">  <span class="type">string</span> port = <span class="number">3</span>;</span><br><span class="line">  <span class="type">string</span> token = <span class="number">4</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>与 GateServer 的 <code>StatusGrpcClient</code>、生成的 <code>message.grpc.pb.*</code> 对应。</p>
+<hr>
+<h2 id="四、状态服务自测清单"><a href="#四、状态服务自测清单" class="headerlink" title="四、状态服务自测清单"></a>四、状态服务自测清单</h2><ol>
+<li>StatusServer 启动是否监听 <code>50052</code>？  </li>
+<li><code>config.ini</code> 里 chatserver 列表是否非空？  </li>
+<li>Gate 登录成功日志是否出现 <code>succeed to load userinfo uid is ...</code>？  </li>
+<li>Redis 是否出现 <code>utoken_&lt;uid&gt;</code>？  </li>
+<li>客户端回包是否包含 <code>host</code> &#x2F; <code>token</code> &#x2F; <code>uid</code>？</li>
+</ol>
+<hr>
+<h2 id="五、四端串起来（回顾）"><a href="#五、四端串起来（回顾）" class="headerlink" title="五、四端串起来（回顾）"></a>五、四端串起来（回顾）</h2><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">注册：</span><br><span class="line">  Qt → Gate /get_varifycode → Varify → Redis+邮件</span><br><span class="line">  Qt → Gate /user_register  → Redis 校验码 → MySQL 入库</span><br><span class="line"></span><br><span class="line">登录：</span><br><span class="line">  Qt → Gate /user_login → MySQL 按 email 验密</span><br><span class="line">                      → Status GetChatServer → Redis 存 token</span><br><span class="line">                      → 返回 host/token 给 Qt</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>上一篇：<a href="./03-%E9%AA%8C%E8%AF%81%E7%A0%81%E6%9C%8D%E5%8A%A1%E7%AF%87.md">03-验证码服务篇</a><br>返回：<a href="./00-%E6%80%BB%E8%A7%88.md">00-总览</a></p>
+]]></content>
+      <categories>
+        <category>全栈聊天项目</category>
+      </categories>
+      <tags>
+        <tag>全栈聊天项目</tag>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>（登录和状态服务）00-总览</title>
+    <url>/2026/09/18/00-%E6%80%BB%E8%A7%88/</url>
+    <content><![CDATA[<h1 id="00-·-项目总览"><a href="#00-·-项目总览" class="headerlink" title="00 · 项目总览"></a>00 · 项目总览</h1><p>本目录下的文档按「端」拆分，每篇结构统一：</p>
+<ol>
+<li><strong>模块联系</strong>：该端内部模块怎么协作  </li>
+<li><strong>模块功能</strong>：每个文件 &#x2F; 类负责什么  </li>
+<li><strong>代码讲解</strong>：按关键代码块逐段说明</li>
+</ol>
+<hr>
+<h2 id="文档索引"><a href="#文档索引" class="headerlink" title="文档索引"></a>文档索引</h2><table>
+<thead>
+<tr>
+<th>文档</th>
+<th>对应目录</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="./01-%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%AF%87.md">01-客户端篇</a></td>
+<td><code>chat/</code></td>
+<td>Qt UI、HttpMgr、登录注册重置</td>
+</tr>
+<tr>
+<td><a href="./02-%E7%BD%91%E5%85%B3%E7%AF%87.md">02-网关篇</a></td>
+<td><code>GateServer/</code></td>
+<td>HTTP 入口、业务编排、调 gRPC&#x2F;Redis&#x2F;MySQL</td>
+</tr>
+<tr>
+<td><a href="./03-%E9%AA%8C%E8%AF%81%E7%A0%81%E6%9C%8D%E5%8A%A1%E7%AF%87.md">03-验证码服务篇</a></td>
+<td><code>VarifyServer/</code></td>
+<td>Node gRPC、发邮件、写 Redis</td>
+</tr>
+<tr>
+<td><a href="./04-%E7%8A%B6%E6%80%81%E6%9C%8D%E5%8A%A1%E7%AF%87.md">04-状态服务篇</a></td>
+<td><code>StatusServer/</code></td>
+<td>分配 ChatServer、发 Token</td>
+</tr>
+<tr>
+<td><a href="../PROJECT_LEARNING.md">根目录总览</a></td>
+<td>根目录</td>
+<td>架构图、协议表、启动顺序（精简版）</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="端与端之间怎么连"><a href="#端与端之间怎么连" class="headerlink" title="端与端之间怎么连"></a>端与端之间怎么连</h2><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Qt 客户端 ──HTTP/JSON──► GateServer(:8080)</span><br><span class="line">                            │</span><br><span class="line">              ┌─────────────┼─────────────┐</span><br><span class="line">              ▼             ▼             ▼</span><br><span class="line">        VarifyServer   StatusServer     Redis / MySQL</span><br><span class="line">           :50051         :50052</span><br><span class="line">           (gRPC)         (gRPC)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>客户端只打 GateServer</strong>，不直接连 Varify &#x2F; Status。  </li>
+<li><strong>GateServer 是门面</strong>：把 HTTP 转成对内 gRPC &#x2F; Redis &#x2F; MySQL 调用。  </li>
+<li><strong>Redis 是共享状态</strong>：验证码 <code>code_&lt;email&gt;</code>、登录 token <code>utoken_&lt;uid&gt;</code>。  </li>
+<li><strong>MySQL 是用户持久化</strong>：注册、登录验密、重置密码。</li>
+</ul>
+<p>建议阅读顺序：<strong>总览 → 客户端 → 网关 → 验证码 → 状态服务</strong>。</p>
+]]></content>
+      <categories>
+        <category>全栈聊天项目</category>
+      </categories>
+      <tags>
+        <tag>全栈聊天项目</tag>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>（登录和状态服务）02-网关篇</title>
+    <url>/2026/09/18/02-%E7%BD%91%E5%85%B3%E7%AF%87/</url>
+    <content><![CDATA[<h1 id="02-·-网关篇（GateServer-）"><a href="#02-·-网关篇（GateServer-）" class="headerlink" title="02 · 网关篇（GateServer/）"></a>02 · 网关篇（<code>GateServer/</code>）</h1><p>GateServer 是整个系统的 <strong>HTTP 门面</strong>：客户端只认识它；它再去调 VarifyServer、StatusServer、Redis、MySQL。</p>
+<hr>
+<h2 id="一、模块联系"><a href="#一、模块联系" class="headerlink" title="一、模块联系"></a>一、模块联系</h2><h3 id="1-1-关系总图"><a href="#1-1-关系总图" class="headerlink" title="1.1 关系总图"></a>1.1 关系总图</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">main (GateServer.cpp)</span><br><span class="line">  ├─ ConfigMgr          读 config.ini</span><br><span class="line">  ├─ io_context(主)     只负责 accept + 信号</span><br><span class="line">  └─ CServer::Start()</span><br><span class="line">        │</span><br><span class="line">        ├─ AsioIOServicePool::GetIOService()   给连接挑一个工作线程的 io_context</span><br><span class="line">        └─ async_accept → HttpConnection</span><br><span class="line">              │</span><br><span class="line">              ├─ http::async_read</span><br><span class="line">              ├─ HandleReq()</span><br><span class="line">              │     └─ LogicSystem::HandlePost / HandleGet</span><br><span class="line">              │           ├─ VerifyGrpcClient  → VarifyServer :50051</span><br><span class="line">              │           ├─ StatusGrpcClient  → StatusServer :50052</span><br><span class="line">              │           ├─ RedisMgr          → Redis</span><br><span class="line">              │           └─ MysqlMgr→MysqlDao → MySQL</span><br><span class="line">              └─ WriteResponse() 短连接关闭</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-协作要点"><a href="#1-2-协作要点" class="headerlink" title="1.2 协作要点"></a>1.2 协作要点</h3><table>
+<thead>
+<tr>
+<th>模块</th>
+<th>在链路中的位置</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>CServer</code></td>
+<td>监听端口，接新连接</td>
+</tr>
+<tr>
+<td><code>AsioIOServicePool</code></td>
+<td>多 <code>io_context</code> 线程池，提高并发</td>
+</tr>
+<tr>
+<td><code>HttpConnection</code></td>
+<td>读 HTTP、调逻辑、写响应、超时</td>
+</tr>
+<tr>
+<td><code>LogicSystem</code></td>
+<td>URL → 业务 handler 的注册表（核心编排）</td>
+</tr>
+<tr>
+<td><code>VarifyGrpcClient</code></td>
+<td>拿验证码 &#x2F; 触发发邮件</td>
+</tr>
+<tr>
+<td><code>StatusGrpcClient</code></td>
+<td>登录后问「连哪台 ChatServer」</td>
+</tr>
+<tr>
+<td><code>RedisMgr</code></td>
+<td>读 <code>code_&lt;email&gt;</code> 校验验证码</td>
+</tr>
+<tr>
+<td><code>MysqlMgr/Dao</code></td>
+<td>注册、验密、改密</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="二、各模块功能"><a href="#二、各模块功能" class="headerlink" title="二、各模块功能"></a>二、各模块功能</h2><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GateServer.cpp</code></td>
+<td>入口：读端口、信号退出、<code>CServer</code> + <code>ioc.run()</code></td>
+</tr>
+<tr>
+<td><code>CServer.*</code></td>
+<td><code>async_accept</code>，把 socket 交给 <code>HttpConnection</code></td>
+</tr>
+<tr>
+<td><code>HttpConnection.*</code></td>
+<td>Beast HTTP 读写、GET 参数解析、60s deadline</td>
+</tr>
+<tr>
+<td><code>LogicSystem.*</code></td>
+<td>注册 <code>/get_varifycode</code> 等路由并实现业务</td>
+</tr>
+<tr>
+<td><code>AsioIOServicePool.*</code></td>
+<td>IO 线程池（round-robin）</td>
+</tr>
+<tr>
+<td><code>ConfigMgr.*</code></td>
+<td>INI 配置单例</td>
+</tr>
+<tr>
+<td><code>VarifyGrpcClient.*</code></td>
+<td>gRPC Stub 连接池 → <code>GetVarifyCode</code></td>
+</tr>
+<tr>
+<td><code>StatusGrpcClient.*</code></td>
+<td>gRPC Stub 连接池 → <code>GetChatServer</code></td>
+</tr>
+<tr>
+<td><code>RedisMgr.*</code></td>
+<td>hiredis 连接池封装</td>
+</tr>
+<tr>
+<td><code>MysqlMgr.*</code> &#x2F; <code>MysqlDao.*</code></td>
+<td>MySQL 业务与连接池</td>
+</tr>
+<tr>
+<td><code>message.proto</code></td>
+<td>与 Varify &#x2F; Status 共用的 protobuf</td>
+</tr>
+<tr>
+<td><code>const.h</code></td>
+<td>错误码、<code>CODEPREFIX=&quot;code_&quot;</code>、<code>Defer</code></td>
+</tr>
+<tr>
+<td><code>config.ini</code></td>
+<td>各服务地址与 DB&#x2F;Redis</td>
+</tr>
+</tbody></table>
+<h3 id="HTTP-路由一览"><a href="#HTTP-路由一览" class="headerlink" title="HTTP 路由一览"></a>HTTP 路由一览</h3><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路径</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/get_test</code></td>
+<td>调试：打印 query</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/get_varifycode</code></td>
+<td>调 VarifyServer 发验证码</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/user_register</code></td>
+<td>Redis 校验码 + MySQL 注册</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/reset_pwd</code></td>
+<td>Redis 校验码 + 更新密码</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/user_login</code></td>
+<td>按邮箱验密 + StatusServer 分配聊天服</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="三、代码讲解"><a href="#三、代码讲解" class="headerlink" title="三、代码讲解"></a>三、代码讲解</h2><h3 id="3-1-入口：监听与退出"><a href="#3-1-入口：监听与退出" class="headerlink" title="3.1 入口：监听与退出"></a>3.1 入口：监听与退出</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// GateServer.cpp</span></span><br><span class="line"><span class="keyword">auto</span> &amp; gCfgMgr = ConfigMgr::<span class="built_in">GetInstance</span>();</span><br><span class="line"><span class="type">unsigned</span> <span class="type">short</span> gate_port = <span class="built_in">atoi</span>(gCfgMgr[<span class="string">&quot;GateServer&quot;</span>][<span class="string">&quot;Port&quot;</span>].<span class="built_in">c_str</span>());</span><br><span class="line"></span><br><span class="line">net::io_context ioc&#123; <span class="number">1</span> &#125;;</span><br><span class="line"><span class="function">net::signal_set <span class="title">signals</span><span class="params">(ioc, SIGINT, SIGTERM)</span></span>;</span><br><span class="line">signals.<span class="built_in">async_wait</span>([&amp;ioc](<span class="keyword">auto</span>&amp; error, <span class="type">int</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (!error) ioc.<span class="built_in">stop</span>();</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">std::<span class="built_in">make_shared</span>&lt;CServer&gt;(ioc, gate_port)-&gt;<span class="built_in">Start</span>();</span><br><span class="line">ioc.<span class="built_in">run</span>();</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>主 <code>io_context</code> 只跑 <strong>accept + 信号处理</strong>。</li>
+<li>真正处理 HTTP 的读写在 <code>AsioIOServicePool</code> 的工作线程上。</li>
+</ul>
+<hr>
+<h3 id="3-2-接受连接：接到线程池"><a href="#3-2-接受连接：接到线程池" class="headerlink" title="3.2 接受连接：接到线程池"></a>3.2 接受连接：接到线程池</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">CServer::Start</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> self = <span class="built_in">shared_from_this</span>();</span><br><span class="line">    <span class="keyword">auto</span>&amp; io_context = AsioIOServicePool::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">GetIOService</span>();</span><br><span class="line">    <span class="keyword">auto</span> new_con = std::<span class="built_in">make_shared</span>&lt;HttpConnection&gt;(io_context);</span><br><span class="line"></span><br><span class="line">    _acceptor.<span class="built_in">async_accept</span>(new_con-&gt;<span class="built_in">GetSocket</span>(), [self, new_con](beast::error_code ec) &#123;</span><br><span class="line">        <span class="keyword">if</span> (ec) &#123; self-&gt;<span class="built_in">Start</span>(); <span class="keyword">return</span>; &#125;</span><br><span class="line">        new_con-&gt;<span class="built_in">Start</span>();</span><br><span class="line">        self-&gt;<span class="built_in">Start</span>();   <span class="comment">// 继续等下一个连接</span></span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>每个连接绑定到池里的某个 <code>io_context</code>，避免单线程瓶颈。</li>
+<li><code>Start()</code> 递归挂新的 <code>async_accept</code>，形成持续监听。</li>
+</ul>
+<hr>
+<h3 id="3-3-HTTP-读-→-分发-→-写"><a href="#3-3-HTTP-读-→-分发-→-写" class="headerlink" title="3.3 HTTP 读 → 分发 → 写"></a>3.3 HTTP 读 → 分发 → 写</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">HttpConnection::Start</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> self = <span class="built_in">shared_from_this</span>();</span><br><span class="line">    http::<span class="built_in">async_read</span>(_socket, _buffer, _request,</span><br><span class="line">        [self](beast::error_code ec, std::<span class="type">size_t</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (ec) <span class="keyword">return</span>;</span><br><span class="line">            self-&gt;<span class="built_in">HandleReq</span>();</span><br><span class="line">            self-&gt;<span class="built_in">CheckDeadline</span>();</span><br><span class="line">        &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">HttpConnection::HandleReq</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    _response.<span class="built_in">version</span>(_request.<span class="built_in">version</span>());</span><br><span class="line">    _response.<span class="built_in">keep_alive</span>(<span class="literal">false</span>);   <span class="comment">// 短连接</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (_request.<span class="built_in">method</span>() == http::verb::post) &#123;</span><br><span class="line">        <span class="type">bool</span> ok = LogicSystem::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">HandlePost</span>(</span><br><span class="line">            _request.<span class="built_in">target</span>(), <span class="built_in">shared_from_this</span>());</span><br><span class="line">        <span class="keyword">if</span> (!ok) &#123;</span><br><span class="line">            _response.<span class="built_in">result</span>(http::status::not_found);</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            _response.<span class="built_in">result</span>(http::status::ok);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">WriteResponse</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>业务<strong>不在这里写</strong>，只负责协议层；具体逻辑全在 <code>LogicSystem</code>。</li>
+<li><code>keep_alive(false)</code>：一请求一响应后关连接，实现简单。</li>
+</ul>
+<hr>
+<h3 id="3-4-获取验证码路由"><a href="#3-4-获取验证码路由" class="headerlink" title="3.4 获取验证码路由"></a>3.4 获取验证码路由</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="built_in">RegPost</span>(<span class="string">&quot;/get_varifycode&quot;</span>, [](std::shared_ptr&lt;HttpConnection&gt; connection) &#123;</span><br><span class="line">    <span class="keyword">auto</span> body_str = boost::beast::<span class="built_in">buffers_to_string</span>(connection-&gt;_request.<span class="built_in">body</span>().<span class="built_in">data</span>());</span><br><span class="line">    Json::Value src_root;</span><br><span class="line">    Json::Reader reader;</span><br><span class="line">    <span class="keyword">if</span> (!reader.<span class="built_in">parse</span>(body_str, src_root) || !src_root.<span class="built_in">isMember</span>(<span class="string">&quot;email&quot;</span>)) &#123;</span><br><span class="line">        <span class="comment">// 返回 Error_Json</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">auto</span> email = src_root[<span class="string">&quot;email&quot;</span>].<span class="built_in">asString</span>();</span><br><span class="line">    GetVarifyRsp rsp = VerifyGrpcClient::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">GetVarifyCode</span>(email);</span><br><span class="line"></span><br><span class="line">    Json::Value root;</span><br><span class="line">    root[<span class="string">&quot;error&quot;</span>] = rsp.<span class="built_in">error</span>();</span><br><span class="line">    root[<span class="string">&quot;email&quot;</span>] = src_root[<span class="string">&quot;email&quot;</span>];</span><br><span class="line">    beast::<span class="built_in">ostream</span>(connection-&gt;_response.<span class="built_in">body</span>()) &lt;&lt; root.<span class="built_in">toStyledString</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>Gate 自己不发邮件，只做 <strong>HTTP → gRPC 转发</strong>。</li>
+<li>验证码真正写入 Redis 在 VarifyServer 侧完成。</li>
+</ul>
+<hr>
+<h3 id="3-5-注册：校验码-写库"><a href="#3-5-注册：校验码-写库" class="headerlink" title="3.5 注册：校验码 + 写库"></a>3.5 注册：校验码 + 写库</h3><p>核心步骤（逻辑顺序）：</p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">1. 解析 JSON：user / email / passwd / confirm / varifycode</span><br><span class="line">2. passwd == confirm ?</span><br><span class="line">3. Redis GET code_&lt;email&gt;，比对 varifycode</span><br><span class="line">4. MysqlMgr::RegUser(name, email, pwd)  → CALL reg_user</span><br><span class="line">5. 返回 uid 或 UserExist</span><br></pre></td></tr></table></figure>
+
+<p>对应代码要点：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">std::string varify_code;</span><br><span class="line"><span class="type">bool</span> b_get_varify = RedisMgr::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">Get</span>(</span><br><span class="line">    CODEPREFIX + email, varify_code);   <span class="comment">// CODEPREFIX = &quot;code_&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (!b_get_varify) &#123; <span class="comment">/* VarifyExpired */</span> &#125;</span><br><span class="line"><span class="keyword">if</span> (varify_code != src_root[<span class="string">&quot;varifycode&quot;</span>].<span class="built_in">asString</span>()) &#123; <span class="comment">/* VarifyCodeErr */</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> uid = MysqlMgr::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">RegUser</span>(name, email, pwd);</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>客户端传来的 <code>passwd</code> 已经是 <code>xorString</code> 后的值，直接入库。</li>
+<li>Redis Key 必须与 VarifyServer 一致：<code>code_</code> + 邮箱。</li>
+</ul>
+<hr>
+<h3 id="3-6-登录：按邮箱验密-分配聊天服"><a href="#3-6-登录：按邮箱验密-分配聊天服" class="headerlink" title="3.6 登录：按邮箱验密 + 分配聊天服"></a>3.6 登录：按邮箱验密 + 分配聊天服</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">auto</span> email = src_root[<span class="string">&quot;email&quot;</span>].<span class="built_in">asString</span>();</span><br><span class="line"><span class="keyword">auto</span> pwd = src_root[<span class="string">&quot;passwd&quot;</span>].<span class="built_in">asString</span>();</span><br><span class="line"></span><br><span class="line">UserInfo userInfo;</span><br><span class="line"><span class="type">bool</span> pwd_valid = MysqlMgr::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">CheckPwd</span>(email, pwd, userInfo);</span><br><span class="line"><span class="keyword">if</span> (!pwd_valid) &#123;</span><br><span class="line">    root[<span class="string">&quot;error&quot;</span>] = ErrorCodes::PasswdInvalid;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> reply = StatusGrpcClient::<span class="built_in">GetInstance</span>()-&gt;<span class="built_in">GetChatServer</span>(userInfo.uid);</span><br><span class="line">root[<span class="string">&quot;error&quot;</span>] = <span class="number">0</span>;</span><br><span class="line">root[<span class="string">&quot;email&quot;</span>] = email;</span><br><span class="line">root[<span class="string">&quot;user&quot;</span>] = userInfo.name;</span><br><span class="line">root[<span class="string">&quot;uid&quot;</span>] = userInfo.uid;</span><br><span class="line">root[<span class="string">&quot;token&quot;</span>] = reply.<span class="built_in">token</span>();</span><br><span class="line">root[<span class="string">&quot;host&quot;</span>] = reply.<span class="built_in">host</span>();</span><br></pre></td></tr></table></figure>
+
+<p>MySQL 侧：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// MysqlDao::CheckPwd</span></span><br><span class="line"><span class="type">const</span> <span class="type">char</span>* sql = <span class="string">&quot;SELECT uid,name,pwd,email FROM user WHERE email = ?&quot;</span>;</span><br><span class="line"><span class="comment">// ... 取出 origin_pwd 后</span></span><br><span class="line"><span class="keyword">if</span> (pwd != origin_pwd) <span class="keyword">return</span> <span class="literal">false</span>;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>登录键是 <strong>email</strong>（与 Qt 登录页一致），不是用户名。</li>
+<li>验密通过后才问 StatusServer 要 host&#x2F;token。</li>
+</ul>
+<hr>
+<h3 id="3-7-gRPC-客户端（验证码）示意"><a href="#3-7-gRPC-客户端（验证码）示意" class="headerlink" title="3.7 gRPC 客户端（验证码）示意"></a>3.7 gRPC 客户端（验证码）示意</h3><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function">GetVarifyRsp <span class="title">VerifyGrpcClient::GetVarifyCode</span><span class="params">(std::string email)</span> </span>&#123;</span><br><span class="line">    ClientContext context;</span><br><span class="line">    GetVarifyRsp reply;</span><br><span class="line">    GetVarifyReq request;</span><br><span class="line">    request.<span class="built_in">set_email</span>(email);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> stub = pool_-&gt;<span class="built_in">getConnection</span>();</span><br><span class="line">    Status status = stub-&gt;<span class="built_in">GetVarifyCode</span>(&amp;context, request, &amp;reply);</span><br><span class="line">    pool_-&gt;returnConnection(std::<span class="built_in">move</span>(stub));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!status.<span class="built_in">ok</span>())</span><br><span class="line">        reply.<span class="built_in">set_error</span>(ErrorCodes::RPCFailed);</span><br><span class="line">    <span class="keyword">return</span> reply;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>Stub 池避免每次新建 Channel。</li>
+<li>配置里 Host&#x2F;Port 大小写必须与 <code>config.ini</code> 键名一致（例如 <code>Host</code> vs <code>host</code>）。</li>
+</ul>
+<hr>
+<h2 id="四、网关自测清单"><a href="#四、网关自测清单" class="headerlink" title="四、网关自测清单"></a>四、网关自测清单</h2><ol>
+<li><code>config.ini</code> 中 Varify &#x2F; Status &#x2F; Redis &#x2F; MySQL 是否都能连通？  </li>
+<li>收到 <code>/get_varifycode</code> 后 VarifyServer 是否有日志？  </li>
+<li>注册时 Redis 是否存在 <code>code_&lt;email&gt;</code>？  </li>
+<li>登录 JSON 是否含 <code>email</code>（不是只发 <code>user</code>）？  </li>
+<li>登录成功后是否拿到 <code>token</code> 与 <code>host</code>？</li>
+</ol>
+<hr>
+<p>上一篇：<a href="./01-%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%AF%87.md">01-客户端篇</a><br>下一篇：<a href="./03-%E9%AA%8C%E8%AF%81%E7%A0%81%E6%9C%8D%E5%8A%A1%E7%AF%87.md">03-验证码服务篇</a></p>
+]]></content>
+      <categories>
+        <category>全栈聊天项目</category>
+      </categories>
+      <tags>
+        <tag>全栈聊天项目</tag>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>add_kernel</title>
     <url>/2026/09/17/CUDA%E7%BC%96%E7%A8%8B/</url>
-    <content><![CDATA[<h1 id="add-kernel"><a href="#add-kernel" class="headerlink" title="add_kernel"></a>add_kernel</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;torch/extension.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CHECK_CUDA(x) TORCH_CHECK(x.device().is_cuda(), #x <span class="string">&quot; must be a CUDA tensor&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CHECK_CONTIGUOUS(x) TORCH_CHECK(x.is_contiguous(), #x <span class="string">&quot; must be contiguous&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CHECK_INPUT(x)                                                                                                 \</span></span><br><span class="line"><span class="meta">  CHECK_CUDA(x);                                                                                                       \</span></span><br><span class="line"><span class="meta">  CHECK_CONTIGUOUS(x)</span></span><br><span class="line"></span><br><span class="line"><span class="function">__global__ <span class="type">void</span> <span class="title">add_kernel</span><span class="params">(<span class="type">const</span> <span class="type">float</span> *input1, <span class="type">const</span> <span class="type">float</span> *input2, <span class="type">float</span> *output, <span class="type">int</span> size)</span> </span>&#123;</span><br><span class="line">  <span class="type">const</span> <span class="type">int</span> idx = blockIdx.x * blockDim.x + threadIdx.x;</span><br><span class="line">  <span class="keyword">if</span> (idx &lt; size)</span><br><span class="line">    output[idx] = input1[idx] + input2[idx];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">torch::Tensor <span class="title">add</span><span class="params">(torch::Tensor input1, torch::Tensor input2)</span> </span>&#123;</span><br><span class="line">  <span class="built_in">CHECK_INPUT</span>(input1);</span><br><span class="line">  <span class="built_in">CHECK_INPUT</span>(input2);</span><br><span class="line">  <span class="type">int</span> size = input1.<span class="built_in">numel</span>();</span><br><span class="line">  <span class="built_in">TORCH_CHECK</span>(size == input2.<span class="built_in">numel</span>(), <span class="string">&quot;input1 and input2 must have the same size&quot;</span>);</span><br><span class="line">  torch::Tensor output = torch::<span class="built_in">empty</span>(size, input1.<span class="built_in">options</span>());</span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> n_threads = <span class="number">256</span>;</span><br><span class="line">  <span class="type">int</span> n_blocks = (size + n_threads - <span class="number">1</span>) / n_threads;</span><br><span class="line">  add_kernel&lt;&lt;&lt;n_blocks, n_threads&gt;&gt;&gt;(input1.<span class="built_in">data_ptr</span>&lt;<span class="type">float</span>&gt;(), input2.<span class="built_in">data_ptr</span>&lt;<span class="type">float</span>&gt;(), output.<span class="built_in">data_ptr</span>&lt;<span class="type">float</span>&gt;(),</span><br><span class="line">                                      size);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> output;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">PYBIND11_MODULE</span>(TORCH_EXTENSION_NAME, m) &#123; m.<span class="built_in">def</span>(<span class="string">&quot;add&quot;</span>, &amp;add, <span class="string">&quot;Add two vectors&quot;</span>); &#125;</span><br></pre></td></tr></table></figure>
+    <content><![CDATA[<h1 id="add-kernel"><a href="#add-kernel" class="headerlink" title="add_kernel"></a>add_kernel</h1><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;torch/extension.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CHECK_CUDA(x) TORCH_CHECK(x.device().is_cuda(), #x <span class="string">&quot; must be a CUDA tensor&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CHECK_CONTIGUOUS(x) TORCH_CHECK(x.is_contiguous(), #x <span class="string">&quot; must be contiguous&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CHECK_INPUT(x)                                                                                                 \</span></span><br><span class="line"><span class="meta">  CHECK_CUDA(x);                                                                                                       \</span></span><br><span class="line"><span class="meta">  CHECK_CONTIGUOUS(x)</span></span><br><span class="line"></span><br><span class="line"><span class="function">__global__ <span class="type">void</span> <span class="title">add_kernel</span><span class="params">(<span class="type">const</span> <span class="type">float</span> *input1, <span class="type">const</span> <span class="type">float</span> *input2, <span class="type">float</span> *output, <span class="type">int</span> size)</span> </span>&#123;</span><br><span class="line">  <span class="type">const</span> <span class="type">int</span> idx = blockIdx.x * blockDim.x + threadIdx.x;</span><br><span class="line">  <span class="keyword">if</span> (idx &lt; size)</span><br><span class="line">    output[idx] = input1[idx] + input2[idx];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">torch::Tensor <span class="title">add</span><span class="params">(torch::Tensor input1, torch::Tensor input2)</span> </span>&#123;</span><br><span class="line">  <span class="built_in">CHECK_INPUT</span>(input1);</span><br><span class="line">  <span class="built_in">CHECK_INPUT</span>(input2);</span><br><span class="line">  <span class="type">int</span> size = input1.<span class="built_in">numel</span>();</span><br><span class="line">  <span class="built_in">TORCH_CHECK</span>(size == input2.<span class="built_in">numel</span>(), <span class="string">&quot;input1 and input2 must have the same size&quot;</span>);</span><br><span class="line">  torch::Tensor output = torch::<span class="built_in">empty</span>(size, input1.<span class="built_in">options</span>());</span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> n_threads = <span class="number">256</span>;</span><br><span class="line">  <span class="type">int</span> n_blocks = (size + n_threads - <span class="number">1</span>) / n_threads;</span><br><span class="line">  add_kernel&lt;&lt;&lt;n_blocks, n_threads&gt;&gt;&gt;(input1.<span class="built_in">data_ptr</span>&lt;<span class="type">float</span>&gt;(), input2.<span class="built_in">data_ptr</span>&lt;<span class="type">float</span>&gt;(), output.<span class="built_in">data_ptr</span>&lt;<span class="type">float</span>&gt;(),</span><br><span class="line">                                      size);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> output;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">PYBIND11_MODULE</span>(TORCH_EXTENSION_NAME, m) &#123; m.<span class="built_in">def</span>(<span class="string">&quot;add&quot;</span>, &amp;add, <span class="string">&quot;Add two vectors&quot;</span>); &#125;</span><br></pre></td></tr></table></figure>
+
 ]]></content>
       <categories>
         <category>cuda</category>
       </categories>
       <tags>
+        <tag>C++</tag>
         <tag>cuda</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>（登录和状态服务）03-验证码服务篇</title>
+    <url>/2026/09/18/03-%E9%AA%8C%E8%AF%81%E7%A0%81%E6%9C%8D%E5%8A%A1%E7%AF%87/</url>
+    <content><![CDATA[<h1 id="03-·-验证码服务篇（VarifyServer-）"><a href="#03-·-验证码服务篇（VarifyServer-）" class="headerlink" title="03 · 验证码服务篇（VarifyServer/）"></a>03 · 验证码服务篇（<code>VarifyServer/</code>）</h1><p>VarifyServer 是 <strong>Node.js gRPC 微服务</strong>：只负责「生成验证码 → 写 Redis → 发邮件」。<br>不直接对 Qt 开放，只被 GateServer 调用。</p>
+<hr>
+<h2 id="一、模块联系"><a href="#一、模块联系" class="headerlink" title="一、模块联系"></a>一、模块联系</h2><h3 id="1-1-关系总图"><a href="#1-1-关系总图" class="headerlink" title="1.1 关系总图"></a>1.1 关系总图</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">GateServer (C++ gRPC Client)</span><br><span class="line">        │  GetVarifyCode(&#123; email &#125;)</span><br><span class="line">        ▼</span><br><span class="line">server.js  ──addService──► VarifyService</span><br><span class="line">        │</span><br><span class="line">        ├─ redis.js   Get / Set+Expire   → Redis  key = code_&lt;email&gt;</span><br><span class="line">        ├─ email.js   SendMail           → SMTP（如 163）</span><br><span class="line">        ├─ config.js  ← config.json      邮箱账号、Redis 地址</span><br><span class="line">        ├─ const.js   code_prefix / Errors</span><br><span class="line">        └─ proto.js   ← message.proto    加载 gRPC 服务定义</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-协作要点"><a href="#1-2-协作要点" class="headerlink" title="1.2 协作要点"></a>1.2 协作要点</h3><table>
+<thead>
+<tr>
+<th>关系</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Gate ↔ Varify</td>
+<td>仅 gRPC，端口默认 <code>50051</code></td>
+</tr>
+<tr>
+<td>Varify ↔ Redis</td>
+<td>验证码缓存；Gate 注册时也读同一 Key</td>
+</tr>
+<tr>
+<td>Varify ↔ 邮箱</td>
+<td>nodemailer 发信；失败走 Exception</td>
+</tr>
+<tr>
+<td>与 MySQL</td>
+<td>本服务当前发码路径不写 MySQL</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="二、各模块功能"><a href="#二、各模块功能" class="headerlink" title="二、各模块功能"></a>二、各模块功能</h2><table>
+<thead>
+<tr>
+<th>文件</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>server.js</code></td>
+<td>入口；实现 <code>GetVarifyCode</code>；绑定 <code>0.0.0.0:50051</code></td>
+</tr>
+<tr>
+<td><code>proto.js</code></td>
+<td>用 <code>@grpc/proto-loader</code> 加载 <code>message.proto</code></td>
+</tr>
+<tr>
+<td><code>message.proto</code></td>
+<td><code>VarifyService.GetVarifyCode</code> 定义</td>
+</tr>
+<tr>
+<td><code>redis.js</code></td>
+<td>ioredis：<code>GetRedis</code> &#x2F; <code>SetRedisExpire</code></td>
+</tr>
+<tr>
+<td><code>email.js</code></td>
+<td>nodemailer 创建 transport 并 <code>sendMail</code></td>
+</tr>
+<tr>
+<td><code>config.js</code> &#x2F; <code>config.json</code></td>
+<td>邮箱、Redis 等配置</td>
+</tr>
+<tr>
+<td><code>const.js</code></td>
+<td><code>code_ = &quot;code_&quot;</code>；错误码 Success&#x2F;RedisErr&#x2F;Exception</td>
+</tr>
+<tr>
+<td><code>package.json</code></td>
+<td>依赖与 <code>npm run serve</code></td>
+</tr>
+</tbody></table>
+<h3 id="Redis-Key-约定"><a href="#Redis-Key-约定" class="headerlink" title="Redis Key 约定"></a>Redis Key 约定</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Key:   code_&lt;邮箱&gt;</span><br><span class="line">Value: 4 位验证码（来自 UUID 截断）</span><br><span class="line">TTL:   600 秒</span><br></pre></td></tr></table></figure>
+
+<p>GateServer 使用同一前缀宏：<code>CODEPREFIX &quot;code_&quot;</code>。</p>
+<hr>
+<h2 id="三、代码讲解"><a href="#三、代码讲解" class="headerlink" title="三、代码讲解"></a>三、代码讲解</h2><h3 id="3-1-启动-gRPC-服务"><a href="#3-1-启动-gRPC-服务" class="headerlink" title="3.1 启动 gRPC 服务"></a>3.1 启动 gRPC 服务</h3><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">main</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> server = <span class="keyword">new</span> grpc.<span class="title class_">Server</span>()</span><br><span class="line">    server.<span class="title function_">addService</span>(message_proto.<span class="property">VarifyService</span>.<span class="property">service</span>, &#123;</span><br><span class="line">        <span class="title class_">GetVarifyCode</span>: <span class="title class_">GetVarifyCode</span></span><br><span class="line">    &#125;)</span><br><span class="line">    server.<span class="title function_">bindAsync</span>(<span class="string">&#x27;0.0.0.0:50051&#x27;</span>,</span><br><span class="line">        grpc.<span class="property">ServerCredentials</span>.<span class="title function_">createInsecure</span>(), <span class="function">() =&gt;</span> &#123;</span><br><span class="line">            server.<span class="title function_">start</span>()</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;grpc server started&#x27;</span>)</span><br><span class="line">        &#125;)</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">main</span>()</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li><code>addService</code>：把 RPC 名映射到本地函数。</li>
+<li><code>createInsecure()</code>：教学环境无 TLS；生产应加证书。</li>
+<li>新版 <code>@grpc/grpc-js</code> 中 <code>server.start()</code> 可省略（会有 DeprecationWarning）。</li>
+</ul>
+<hr>
+<h3 id="3-2-GetVarifyCode-主流程"><a href="#3-2-GetVarifyCode-主流程" class="headerlink" title="3.2 GetVarifyCode 主流程"></a>3.2 GetVarifyCode 主流程</h3><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">GetVarifyCode</span>(<span class="params">call, callback</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;email is &quot;</span>, call.<span class="property">request</span>.<span class="property">email</span>)</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> query_res = <span class="keyword">await</span> redis_module.<span class="title class_">GetRedis</span>(</span><br><span class="line">            const_module.<span class="property">code_prefix</span> + call.<span class="property">request</span>.<span class="property">email</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> uniqueId = query_res;</span><br><span class="line">        <span class="keyword">if</span> (query_res == <span class="literal">null</span>) &#123;</span><br><span class="line">            uniqueId = <span class="title function_">uuidv4</span>();</span><br><span class="line">            <span class="keyword">if</span> (uniqueId.<span class="property">length</span> &gt; <span class="number">4</span>)</span><br><span class="line">                uniqueId = uniqueId.<span class="title function_">substring</span>(<span class="number">0</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">let</span> bres = <span class="keyword">await</span> redis_module.<span class="title class_">SetRedisExpire</span>(</span><br><span class="line">                const_module.<span class="property">code_prefix</span> + call.<span class="property">request</span>.<span class="property">email</span>,</span><br><span class="line">                uniqueId, <span class="number">600</span>);</span><br><span class="line">            <span class="keyword">if</span> (!bres) &#123;</span><br><span class="line">                <span class="title function_">callback</span>(<span class="literal">null</span>, &#123;</span><br><span class="line">                    <span class="attr">email</span>: call.<span class="property">request</span>.<span class="property">email</span>,</span><br><span class="line">                    <span class="attr">error</span>: const_module.<span class="property">Errors</span>.<span class="property">RedisErr</span></span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> mailOptions = &#123;</span><br><span class="line">            <span class="attr">from</span>: config_module.<span class="property">email_user</span>,</span><br><span class="line">            <span class="attr">to</span>: call.<span class="property">request</span>.<span class="property">email</span>,</span><br><span class="line">            <span class="attr">subject</span>: <span class="string">&#x27;验证码&#x27;</span>,</span><br><span class="line">            <span class="attr">text</span>: <span class="string">&#x27;您的验证码为&#x27;</span> + uniqueId + <span class="string">&#x27;请三分钟内完成注册&#x27;</span>,</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">await</span> emailModule.<span class="title class_">SendMail</span>(mailOptions);</span><br><span class="line"></span><br><span class="line">        <span class="title function_">callback</span>(<span class="literal">null</span>, &#123;</span><br><span class="line">            <span class="attr">email</span>: call.<span class="property">request</span>.<span class="property">email</span>,</span><br><span class="line">            <span class="attr">error</span>: const_module.<span class="property">Errors</span>.<span class="property">Success</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">        <span class="title function_">callback</span>(<span class="literal">null</span>, &#123;</span><br><span class="line">            <span class="attr">email</span>: call.<span class="property">request</span>.<span class="property">email</span>,</span><br><span class="line">            <span class="attr">error</span>: const_module.<span class="property">Errors</span>.<span class="property">Exception</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>逐步理解：</strong></p>
+<ol>
+<li>先查 Redis：若已有未过期验证码 → <strong>复用</strong>（避免刷接口一直换码）。  </li>
+<li>没有则生成 UUID，截成 4 位，<code>SET</code> + <code>EXPIRE 600</code>。  </li>
+<li>Redis 写失败 → 返回 <code>RedisErr</code>，<strong>不发邮件</strong>。  </li>
+<li>发邮件；成功回 <code>error: 0</code>。  </li>
+<li>注意：proto 里有 <code>code</code> 字段，但当前实现<strong>不把验证码回给 Gate</strong>，只放 Redis + 邮件；Gate 注册时自己读 Redis。</li>
+</ol>
+<hr>
+<h3 id="3-3-Redis-封装"><a href="#3-3-Redis-封装" class="headerlink" title="3.3 Redis 封装"></a>3.3 Redis 封装</h3><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// redis.js（结构示意）</span></span><br><span class="line"><span class="keyword">const</span> <span class="title class_">RedisCli</span> = <span class="keyword">new</span> <span class="title class_">Redis</span>(&#123;</span><br><span class="line">  <span class="attr">host</span>: config_module.<span class="property">redis_host</span>,</span><br><span class="line">  <span class="attr">port</span>: config_module.<span class="property">redis_port</span>,</span><br><span class="line">  <span class="attr">password</span>: config_module.<span class="property">redis_passwd</span>,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">GetRedis</span>(<span class="params">key</span>) &#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> result = <span class="keyword">await</span> <span class="title class_">RedisCli</span>.<span class="title function_">get</span>(key);</span><br><span class="line">    <span class="keyword">return</span> result; <span class="comment">// 不存在则为 null</span></span><br><span class="line">  &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">SetRedisExpire</span>(<span class="params">key, value, exptime</span>) &#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">await</span> <span class="title class_">RedisCli</span>.<span class="title function_">set</span>(key, value);</span><br><span class="line">    <span class="keyword">await</span> <span class="title class_">RedisCli</span>.<span class="title function_">expire</span>(key, exptime);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>学习注意：</strong></p>
+<ul>
+<li>若在 <code>error</code> 回调里调用 <code>quit()</code>，连接会永久关闭，后续全是 <code>Connection is closed</code>。  </li>
+<li>本地 Redis 端口&#x2F;密码必须与 <code>config.json</code> 一致（本项目常用 <code>6380</code>）。</li>
+</ul>
+<hr>
+<h3 id="3-4-发邮件"><a href="#3-4-发邮件" class="headerlink" title="3.4 发邮件"></a>3.4 发邮件</h3><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="comment">// email.js 思路</span></span><br><span class="line"><span class="keyword">let</span> transport = nodemailer.<span class="title function_">createTransport</span>(&#123;</span><br><span class="line">    <span class="attr">host</span>: <span class="string">&quot;smtp.163.com&quot;</span>,</span><br><span class="line">    <span class="attr">port</span>: <span class="number">465</span>,</span><br><span class="line">    <span class="attr">secure</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">auth</span>: &#123;</span><br><span class="line">        <span class="attr">user</span>: config_module.<span class="property">email_user</span>,</span><br><span class="line">        <span class="attr">pass</span>: config_module.<span class="property">email_pass</span>,  <span class="comment">// 授权码，不是登录密码</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="keyword">await</span> transport.<span class="title function_">sendMail</span>(mailOptions);</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong></p>
+<ul>
+<li>163 等邮箱需开启 SMTP 并使用<strong>授权码</strong>。  </li>
+<li>发件失败会 throw → 被 <code>GetVarifyCode</code> 的 catch 转成 <code>Exception</code>。</li>
+</ul>
+<hr>
+<h3 id="3-5-Proto-契约"><a href="#3-5-Proto-契约" class="headerlink" title="3.5 Proto 契约"></a>3.5 Proto 契约</h3><figure class="highlight protobuf"><table><tr><td class="code"><pre><span class="line"><span class="keyword">service </span><span class="title class_">VarifyService</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">rpc</span> GetVarifyCode (GetVarifyReq) <span class="keyword">returns</span> (GetVarifyRsp) </span>&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">message </span><span class="title class_">GetVarifyReq</span> &#123;</span><br><span class="line">  <span class="type">string</span> email = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">message </span><span class="title class_">GetVarifyRsp</span> &#123;</span><br><span class="line">  <span class="type">int32</span> error = <span class="number">1</span>;</span><br><span class="line">  <span class="type">string</span> email = <span class="number">2</span>;</span><br><span class="line">  <span class="type">string</span> code = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Gate 侧 C++ 与 Node 侧必须用<strong>同一套</strong> proto（或兼容字段编号），否则会联调失败。</p>
+<hr>
+<h2 id="四、验证码服务自测清单"><a href="#四、验证码服务自测清单" class="headerlink" title="四、验证码服务自测清单"></a>四、验证码服务自测清单</h2><ol>
+<li><code>npm run serve</code> 后是否打印 <code>grpc server started</code>？  </li>
+<li>Redis 是否在线？启动时有无 <code>RedisCli connect error</code>？  </li>
+<li>Gate 调一次后，本服务是否打印 <code>email is ...</code>？  </li>
+<li>Redis 中是否出现 <code>code_&lt;邮箱&gt;</code>？  </li>
+<li>邮箱是否收到 4 位验证码？</li>
+</ol>
+<hr>
+<p>上一篇：<a href="./02-%E7%BD%91%E5%85%B3%E7%AF%87.md">02-网关篇</a><br>下一篇：<a href="./04-%E7%8A%B6%E6%80%81%E6%9C%8D%E5%8A%A1%E7%AF%87.md">04-状态服务篇</a></p>
+]]></content>
+      <categories>
+        <category>全栈聊天项目</category>
+      </categories>
+      <tags>
+        <tag>全栈聊天项目</tag>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>登录和状态服务</title>
+    <url>/2026/09/17/%E7%99%BB%E5%BD%95%E5%92%8C%E7%8A%B6%E6%80%81%E6%9C%8D%E5%8A%A1/</url>
+    <content><![CDATA[<h1 id="ChatProject-学习指南"><a href="#ChatProject-学习指南" class="headerlink" title="ChatProject 学习指南"></a>ChatProject 学习指南</h1><p>本文档是<strong>总览入口</strong>：先建立全局印象，再按「端」深入阅读 <code>docs/</code> 下的分篇文档。</p>
+<p>每篇分篇结构统一为：</p>
+<ol>
+<li><strong>模块联系</strong>：该端内部模块如何协作  </li>
+<li><strong>模块功能</strong>：各文件 &#x2F; 类职责  </li>
+<li><strong>代码讲解</strong>：关键代码块逐段说明</li>
+</ol>
+<hr>
+<h2 id="分篇文档索引（推荐阅读顺序）"><a href="#分篇文档索引（推荐阅读顺序）" class="headerlink" title="分篇文档索引（推荐阅读顺序）"></a>分篇文档索引（推荐阅读顺序）</h2><table>
+<thead>
+<tr>
+<th>顺序</th>
+<th>文档</th>
+<th>对应目录</th>
+<th>内容侧重</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td><a href="./docs/00-%E6%80%BB%E8%A7%88.md">docs&#x2F;00-总览.md</a></td>
+<td>—</td>
+<td>端与端关系、阅读路线</td>
+</tr>
+<tr>
+<td>1</td>
+<td><a href="./docs/01-%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%AF%87.md">docs&#x2F;01-客户端篇.md</a></td>
+<td><code>chat/</code></td>
+<td>Qt UI、HttpMgr、登录注册重置</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="./docs/02-%E7%BD%91%E5%85%B3%E7%AF%87.md">docs&#x2F;02-网关篇.md</a></td>
+<td><code>GateServer/</code></td>
+<td>HTTP 入口、业务编排、gRPC&#x2F;Redis&#x2F;MySQL</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="./docs/03-%E9%AA%8C%E8%AF%81%E7%A0%81%E6%9C%8D%E5%8A%A1%E7%AF%87.md">docs&#x2F;03-验证码服务篇.md</a></td>
+<td><code>VarifyServer/</code></td>
+<td>Node gRPC、发邮件、写 Redis</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="./docs/04-%E7%8A%B6%E6%80%81%E6%9C%8D%E5%8A%A1%E7%AF%87.md">docs&#x2F;04-状态服务篇.md</a></td>
+<td><code>StatusServer/</code></td>
+<td>分配 ChatServer、签发 Token</td>
+</tr>
+</tbody></table>
+<p>下文保留精简总览（架构图、协议表、启动顺序），细节以分篇为准。</p>
+<hr>
+<h2 id="1-项目全景"><a href="#1-项目全景" class="headerlink" title="1. 项目全景"></a>1. 项目全景</h2><p>本项目是一个<strong>分布式即时通讯（IM）前置系统</strong>：客户端先通过 HTTP 完成注册&#x2F;登录，再准备连接聊天服务器进行长连接通信。</p>
+<p>当前仓库主要模块：</p>
+<table>
+<thead>
+<tr>
+<th>目录</th>
+<th>角色</th>
+<th>语言 &#x2F; 框架</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>chat/</code></td>
+<td>Qt 桌面客户端</td>
+<td>C++ &#x2F; Qt 6</td>
+</tr>
+<tr>
+<td><code>GateServer/</code></td>
+<td>HTTP 网关（对外入口）</td>
+<td>C++ &#x2F; Boost.Asio + Beast</td>
+</tr>
+<tr>
+<td><code>VarifyServer/</code></td>
+<td>邮箱验证码服务</td>
+<td>Node.js &#x2F; gRPC</td>
+</tr>
+<tr>
+<td><code>StatusServer/</code></td>
+<td>状态与聊天服分配服务</td>
+<td>C++ &#x2F; gRPC</td>
+</tr>
+<tr>
+<td>MySQL</td>
+<td>持久化用户数据</td>
+<td>关系型数据库</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>验证码等短期缓存</td>
+<td>内存 KV</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>说明：<code>StatusServer</code> 的配置里已经预留了 <code>chatserver1/2</code>（聊天业务服）。客户端登录成功后会拿到 host&#x2F;token，用于后续 TCP 长连接；ChatServer 本体可能在后续课程&#x2F;其他仓库中完善。</p>
+</blockquote>
+<hr>
+<h2 id="2-整体架构图"><a href="#2-整体架构图" class="headerlink" title="2. 整体架构图"></a>2. 整体架构图</h2><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">┌────────────────────┐</span><br><span class="line">│   Qt 客户端 chat   │</span><br><span class="line">│  (登录/注册/重置)   │</span><br><span class="line">└─────────┬──────────┘</span><br><span class="line">          │ HTTP + JSON</span><br><span class="line">          │ (localhost:8080)</span><br><span class="line">          ▼</span><br><span class="line">┌────────────────────┐         gRPC          ┌────────────────────┐</span><br><span class="line">│     GateServer     │ ────────────────────► │   VarifyServer     │</span><br><span class="line">│   HTTP 网关 :8080  │   GetVarifyCode       │  发邮件验证码 :50051 │</span><br><span class="line">│                    │                       └─────────┬──────────┘</span><br><span class="line">│                    │                                 │</span><br><span class="line">│                    │         gRPC                    │ 写验证码</span><br><span class="line">│                    │ ────────────────────► ┌─────────┴──────────┐</span><br><span class="line">│                    │   GetChatServer       │       Redis        │</span><br><span class="line">│                    │ ◄──────────────────── │   code_&lt;email&gt;     │</span><br><span class="line">│                    │                       └────────────────────┘</span><br><span class="line">│                    │</span><br><span class="line">│                    │ SQL / 连接池</span><br><span class="line">│                    ▼</span><br><span class="line">│              ┌──────────┐</span><br><span class="line">│              │  MySQL   │  user 表（用户名/邮箱/密码）</span><br><span class="line">│              └──────────┘</span><br><span class="line">│</span><br><span class="line">│   登录成功后返回：uid / token / chat host</span><br><span class="line">└────────────────────────────────────────────</span><br><span class="line">                      │</span><br><span class="line">                      ▼（后续阶段）</span><br><span class="line">              ┌────────────────┐</span><br><span class="line">              │  ChatServer(s) │  TCP 长连接聊天</span><br><span class="line">              └────────────────┘</span><br><span class="line">                      ▲</span><br><span class="line">                      │ 由 StatusServer 按策略分配</span><br><span class="line">              ┌───────┴────────┐</span><br><span class="line">              │  StatusServer  │  gRPC :50052</span><br><span class="line">              └────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p><strong>记忆口诀：</strong></p>
+<ul>
+<li>客户端<strong>只认识 GateServer</strong>（HTTP）</li>
+<li>GateServer <strong>对外当门面，对内调 gRPC &#x2F; Redis &#x2F; MySQL</strong></li>
+<li>VarifyServer <strong>只管验证码邮件 + 把验证码写 Redis</strong></li>
+<li>StatusServer <strong>只管“这个用户该连哪台聊天服”</strong></li>
+</ul>
+<hr>
+<h2 id="3-各模块职责与技术栈"><a href="#3-各模块职责与技术栈" class="headerlink" title="3. 各模块职责与技术栈"></a>3. 各模块职责与技术栈</h2><h3 id="3-1-Qt-客户端-chat"><a href="#3-1-Qt-客户端-chat" class="headerlink" title="3.1 Qt 客户端 chat/"></a>3.1 Qt 客户端 <code>chat/</code></h3><p><strong>职责：</strong> 用户界面与请求发起（登录、注册、重置密码）。</p>
+<p><strong>主要技术：</strong></p>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Qt Widgets</td>
+<td>窗口、输入框、按钮、<code>QStackedWidget</code> 翻页</td>
+</tr>
+<tr>
+<td>Qt Network (<code>QNetworkAccessManager</code>)</td>
+<td>发 HTTP POST</td>
+</tr>
+<tr>
+<td>QJsonObject &#x2F; QJsonDocument</td>
+<td>组装&#x2F;解析 JSON</td>
+</tr>
+<tr>
+<td>QTimer</td>
+<td>验证码按钮倒计时、注册成功倒计时</td>
+</tr>
+<tr>
+<td>信号槽</td>
+<td><code>HttpMgr</code> 回包分发给登录&#x2F;注册模块</td>
+</tr>
+<tr>
+<td><code>xorString</code></td>
+<td>密码异或“简单加密”后再上传</td>
+</tr>
+</tbody></table>
+<p><strong>关键文件：</strong></p>
+<ul>
+<li><code>httpmgr.cpp</code>：统一发 HTTP，按 <code>Modules</code> 转发回包</li>
+<li><code>logindialog.cpp</code>：登录，请求 <code>/user_login</code></li>
+<li><code>registerdialog.cpp</code>：注册，请求 <code>/get_varifycode</code>、<code>/user_register</code></li>
+<li><code>resetdialog.cpp</code>：重置密码，请求 <code>/reset_pwd</code></li>
+<li><code>global.cpp</code>：<code>gate_url_prefix</code>、<code>xorString</code></li>
+<li><code>config.ini</code>：GateServer 地址（如 <code>localhost:8080</code>）</li>
+</ul>
+<p><strong>客户端配置示例：</strong></p>
+<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="section">[GateServer]</span></span><br><span class="line"><span class="attr">host</span>=localhost</span><br><span class="line"><span class="attr">port</span>=<span class="number">8080</span></span><br></pre></td></tr></table></figure>
+
+<p>启动后拼出：<code>http://localhost:8080</code></p>
+<hr>
+<h3 id="3-2-GateServer（HTTP-网关）"><a href="#3-2-GateServer（HTTP-网关）" class="headerlink" title="3.2 GateServer（HTTP 网关）"></a>3.2 GateServer（HTTP 网关）</h3><p><strong>职责：</strong> 对外提供 REST 风格 HTTP 接口；对内编排验证码、注册、登录、重置密码。</p>
+<p><strong>主要技术：</strong></p>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Boost.Asio</td>
+<td>异步 IO、线程池 <code>AsioIOServicePool</code></td>
+</tr>
+<tr>
+<td>Boost.Beast</td>
+<td>HTTP 解析与响应</td>
+</tr>
+<tr>
+<td>JsonCpp</td>
+<td>解析请求体 &#x2F; 构造响应</td>
+</tr>
+<tr>
+<td>gRPC C++</td>
+<td>调用 VarifyServer、StatusServer</td>
+</tr>
+<tr>
+<td>Protobuf</td>
+<td>RPC 消息定义（<code>message.proto</code>）</td>
+</tr>
+<tr>
+<td>libmysql &#x2F; 连接池</td>
+<td>读写用户表</td>
+</tr>
+<tr>
+<td>hiredis &#x2F; Redis 连接池</td>
+<td>读验证码 <code>code_&lt;email&gt;</code></td>
+</tr>
+<tr>
+<td>单例 (<code>Singleton</code>)</td>
+<td><code>LogicSystem</code>、<code>RedisMgr</code>、<code>MysqlMgr</code> 等</td>
+</tr>
+</tbody></table>
+<p><strong>对外 HTTP 接口（见 <code>LogicSystem.cpp</code>）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>路径</th>
+<th>方法</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/get_varifycode</code></td>
+<td>POST</td>
+<td>向 VarifyServer 要验证码并发邮件</td>
+</tr>
+<tr>
+<td><code>/user_register</code></td>
+<td>POST</td>
+<td>校验验证码后写入 MySQL</td>
+</tr>
+<tr>
+<td><code>/reset_pwd</code></td>
+<td>POST</td>
+<td>校验验证码后更新密码</td>
+</tr>
+<tr>
+<td><code>/user_login</code></td>
+<td>POST</td>
+<td>按邮箱验密，再向 StatusServer 要聊天服</td>
+</tr>
+</tbody></table>
+<p><strong>配置 <code>GateServer/config.ini</code>：</strong></p>
+<figure class="highlight ini"><table><tr><td class="code"><pre><span class="line"><span class="section">[GateServer]</span></span><br><span class="line"><span class="attr">Port</span> = <span class="number">8080</span></span><br><span class="line"><span class="section">[VarifyServer]</span></span><br><span class="line"><span class="attr">Host</span> = <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"><span class="attr">Port</span> = <span class="number">50051</span></span><br><span class="line"><span class="section">[StatusServer]</span></span><br><span class="line"><span class="attr">Host</span> = <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"><span class="attr">Port</span> = <span class="number">50052</span></span><br><span class="line"><span class="section">[Mysql]</span></span><br><span class="line">...</span><br><span class="line"><span class="section">[Redis]</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="3-3-VarifyServer（验证码服务）"><a href="#3-3-VarifyServer（验证码服务）" class="headerlink" title="3.3 VarifyServer（验证码服务）"></a>3.3 VarifyServer（验证码服务）</h3><p><strong>职责：</strong> 收到 gRPC 请求后生成验证码、写入 Redis、发邮件。</p>
+<p><strong>主要技术：</strong></p>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Node.js</td>
+<td>服务运行时</td>
+</tr>
+<tr>
+<td><code>@grpc/grpc-js</code> + <code>@grpc/proto-loader</code></td>
+<td>gRPC 服务端</td>
+</tr>
+<tr>
+<td><code>uuid</code></td>
+<td>生成验证码（截取前 4 位）</td>
+</tr>
+<tr>
+<td><code>ioredis</code></td>
+<td>读写 Redis</td>
+</tr>
+<tr>
+<td><code>nodemailer</code></td>
+<td>SMTP 发邮件</td>
+</tr>
+</tbody></table>
+<p><strong>关键文件：</strong></p>
+<ul>
+<li><code>server.js</code>：实现 <code>GetVarifyCode</code></li>
+<li><code>email.js</code>：发信</li>
+<li><code>redis.js</code>：<code>GetRedis</code> &#x2F; <code>SetRedisExpire</code></li>
+<li><code>config.json</code>：邮箱账号、Redis 地址</li>
+</ul>
+<p><strong>Redis Key 约定：</strong></p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">code_&lt;邮箱&gt;  =  验证码字符串</span><br><span class="line">过期时间约 600 秒（10 分钟）</span><br></pre></td></tr></table></figure>
+
+<p>GateServer 注册&#x2F;重置时用同一前缀 <code>CODEPREFIX = &quot;code_&quot;</code> 去读，所以两边必须连<strong>同一套 Redis</strong>。</p>
+<hr>
+<h3 id="3-4-StatusServer（状态-分配服务）"><a href="#3-4-StatusServer（状态-分配服务）" class="headerlink" title="3.4 StatusServer（状态 &#x2F; 分配服务）"></a>3.4 StatusServer（状态 &#x2F; 分配服务）</h3><p><strong>职责：</strong> 登录成功后，为用户分配一台 ChatServer，并生成 token。</p>
+<p><strong>主要技术：</strong></p>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>gRPC C++</td>
+<td>提供 <code>StatusService.GetChatServer</code></td>
+</tr>
+<tr>
+<td>Protobuf</td>
+<td>请求 uid，返回 host&#x2F;port&#x2F;token</td>
+</tr>
+<tr>
+<td>Boost.UUID</td>
+<td>生成 token</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>可记录登录人数、token（扩展负载均衡）</td>
+</tr>
+<tr>
+<td>ConfigMgr</td>
+<td>读取多台 chatserver 配置</td>
+</tr>
+</tbody></table>
+<p><strong>接口语义：</strong></p>
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">GetChatServer(uid) → &#123; host, port, token, error &#125;</span><br></pre></td></tr></table></figure>
+
+<p>GateServer 登录成功后调用它，再把结果返回给 Qt 客户端。</p>
+<hr>
+<h3 id="3-5-MySQL"><a href="#3-5-MySQL" class="headerlink" title="3.5 MySQL"></a>3.5 MySQL</h3><p><strong>职责：</strong> 持久化用户账号。</p>
+<p>典型字段（以 <code>user</code> 表 &#x2F; <code>reg_user</code> 存储过程为准）：</p>
+<ul>
+<li><code>uid</code></li>
+<li><code>name</code>（用户名）</li>
+<li><code>email</code></li>
+<li><code>pwd</code>（客户端 <code>xorString</code> 后的密码）</li>
+</ul>
+<p>GateServer 通过：</p>
+<ul>
+<li><code>RegUser</code> → <code>CALL reg_user(...)</code></li>
+<li><code>CheckPwd</code> → <code>SELECT ... FROM user WHERE email = ?</code> 再比对密码</li>
+<li><code>UpdatePwd</code> → 更新密码</li>
+</ul>
+<hr>
+<h3 id="3-6-Redis"><a href="#3-6-Redis" class="headerlink" title="3.6 Redis"></a>3.6 Redis</h3><p><strong>职责：</strong> 缓存短期数据，尤其是验证码。</p>
+<p>本项目中最关键的用途：</p>
+<ol>
+<li>VarifyServer 写入 <code>code_邮箱</code></li>
+<li>GateServer 注册&#x2F;重置时读取并比对</li>
+</ol>
+<p>其他用途（StatusServer）：登录计数、token 缓存等（代码中有相关设计）。</p>
+<hr>
+<h2 id="4-核心业务流程（对照源码学习）"><a href="#4-核心业务流程（对照源码学习）" class="headerlink" title="4. 核心业务流程（对照源码学习）"></a>4. 核心业务流程（对照源码学习）</h2><h3 id="4-1-获取验证码"><a href="#4-1-获取验证码" class="headerlink" title="4.1 获取验证码"></a>4.1 获取验证码</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Qt 填邮箱</span><br><span class="line">  → POST /get_varifycode &#123; email &#125;</span><br><span class="line">  → GateServer</span><br><span class="line">  → gRPC GetVarifyCode</span><br><span class="line">  → VarifyServer：生成码 → Redis SET → 发邮件</span><br><span class="line">  → 回包 error=0</span><br><span class="line">  → Qt 提示“已发送”，按钮 60s 倒计时</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-注册"><a href="#4-2-注册" class="headerlink" title="4.2 注册"></a>4.2 注册</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Qt 提交 &#123; user, email, passwd(xor), confirm(xor), varifycode &#125;</span><br><span class="line">  → POST /user_register</span><br><span class="line">  → GateServer：</span><br><span class="line">       1) Redis GET code_email，比对验证码</span><br><span class="line">       2) MySQL CALL reg_user</span><br><span class="line">  → 成功返回 uid</span><br><span class="line">  → Qt 切到 page_2，5 秒后回登录页</span><br></pre></td></tr></table></figure>
+
+<p>存储过程常见返回值含义（结合你之前日志）：</p>
+<table>
+<thead>
+<tr>
+<th>Result</th>
+<th>含义（常见约定）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&gt;0</td>
+<td>成功，值为 uid</td>
+</tr>
+<tr>
+<td>0</td>
+<td>用户名或邮箱已存在</td>
+</tr>
+<tr>
+<td>-1</td>
+<td>异常 &#x2F; 失败</td>
+</tr>
+</tbody></table>
+<h3 id="4-3-登录"><a href="#4-3-登录" class="headerlink" title="4.3 登录"></a>4.3 登录</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Qt 提交 &#123; email, passwd(xor) &#125;</span><br><span class="line">  → POST /user_login</span><br><span class="line">  → GateServer：</span><br><span class="line">       1) MySQL 按 email 查用户并比对 pwd</span><br><span class="line">       2) gRPC StatusServer.GetChatServer(uid)</span><br><span class="line">  → 返回 &#123; uid, token, host, ... &#125;</span><br><span class="line">  → Qt 后续可用这些信息去连 ChatServer</span><br></pre></td></tr></table></figure>
+
+<p>注意：</p>
+<ul>
+<li>密码在注册和登录时都应经过 <code>xorString</code>，库里存的是异或后的串。</li>
+<li>登录按<strong>邮箱</strong>查库（与客户端表单一致）。</li>
+</ul>
+<h3 id="4-4-重置密码"><a href="#4-4-重置密码" class="headerlink" title="4.4 重置密码"></a>4.4 重置密码</h3><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">Qt 提交邮箱 + 验证码 + 新密码(xor)</span><br><span class="line">  → POST /reset_pwd</span><br><span class="line">  → GateServer 校验 Redis 验证码 → UpdatePwd</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="5-通信协议对照表"><a href="#5-通信协议对照表" class="headerlink" title="5. 通信协议对照表"></a>5. 通信协议对照表</h2><table>
+<thead>
+<tr>
+<th>谁 → 谁</th>
+<th>协议</th>
+<th>内容格式</th>
+<th>典型端口</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Qt → GateServer</td>
+<td>HTTP</td>
+<td>JSON</td>
+<td>8080</td>
+</tr>
+<tr>
+<td>GateServer → VarifyServer</td>
+<td>gRPC</td>
+<td>Protobuf</td>
+<td>50051</td>
+</tr>
+<tr>
+<td>GateServer → StatusServer</td>
+<td>gRPC</td>
+<td>Protobuf</td>
+<td>50052</td>
+</tr>
+<tr>
+<td>VarifyServer &#x2F; GateServer → Redis</td>
+<td>Redis 协议</td>
+<td>字符串 KV</td>
+<td>6380</td>
+</tr>
+<tr>
+<td>GateServer → MySQL</td>
+<td>MySQL 协议</td>
+<td>SQL &#x2F; 存储过程</td>
+<td>3307（你的环境）</td>
+</tr>
+<tr>
+<td>Qt → ChatServer（后续）</td>
+<td>TCP（自定义包）</td>
+<td>业务协议</td>
+<td>8990&#x2F;8991</td>
+</tr>
+</tbody></table>
+<h3 id="Protobuf-服务一览（message-proto）"><a href="#Protobuf-服务一览（message-proto）" class="headerlink" title="Protobuf 服务一览（message.proto）"></a>Protobuf 服务一览（<code>message.proto</code>）</h3><figure class="highlight protobuf"><table><tr><td class="code"><pre><span class="line"><span class="keyword">service </span><span class="title class_">VarifyService</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">rpc</span> GetVarifyCode (GetVarifyReq) <span class="keyword">returns</span> (GetVarifyRsp)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">service </span><span class="title class_">StatusService</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">rpc</span> GetChatServer (GetChatServerReq) <span class="keyword">returns</span> (GetChatServerRsp)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="6-启动顺序建议"><a href="#6-启动顺序建议" class="headerlink" title="6. 启动顺序建议"></a>6. 启动顺序建议</h2><p>本地联调时建议按依赖从下往上启动：</p>
+<ol>
+<li><strong>Redis</strong>（<code>127.0.0.1:6380</code>，密码与配置一致）</li>
+<li><strong>MySQL</strong>（能连上，且存在 <code>user</code> 表、<code>reg_user</code> 存储过程）</li>
+<li><strong>VarifyServer</strong>：<code>npm run serve</code>（监听 <code>50051</code>）</li>
+<li><strong>StatusServer</strong>（监听 <code>50052</code>）</li>
+<li><strong>GateServer</strong>（监听 <code>8080</code>）</li>
+<li><strong>Qt 客户端</strong></li>
+</ol>
+<p>缺一不可的常见现象：</p>
+<table>
+<thead>
+<tr>
+<th>现象</th>
+<th>常见原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>参数错误 &#x2F; RPCFailed</td>
+<td>Gate 连不上 Varify&#x2F;Status，或配置 Host&#x2F;Port 写错大小写</td>
+</tr>
+<tr>
+<td>Redis Connection is closed</td>
+<td>Redis 没起，或 Varify 错误后 quit 了连接</td>
+</tr>
+<tr>
+<td>user or email exist</td>
+<td>邮箱&#x2F;用户名已注册</td>
+</tr>
+<tr>
+<td>user pwd not match</td>
+<td>曾按用户名查库、或密码未 xor、或邮箱不存在</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="7-推荐源码阅读顺序"><a href="#7-推荐源码阅读顺序" class="headerlink" title="7. 推荐源码阅读顺序"></a>7. 推荐源码阅读顺序</h2><p>按“从外到内”读，更容易建立全局图：</p>
+<ol>
+<li><code>chat/main.cpp</code> → 读 <code>config.ini</code>，得到 <code>gate_url_prefix</code></li>
+<li><code>chat/httpmgr.cpp</code> → HTTP 怎么发、信号怎么分模块</li>
+<li><code>chat/registerdialog.cpp</code> &#x2F; <code>logindialog.cpp</code> → 业务请求字段</li>
+<li><code>GateServer/CServer.cpp</code> + <code>HttpConnection.cpp</code> → 连接怎么接、HTTP 怎么读</li>
+<li><code>GateServer/LogicSystem.cpp</code> → <strong>最重要的业务编排</strong></li>
+<li><code>GateServer/VarifyGrpcClient.*</code> &#x2F; <code>StatusGrpcClient.*</code> → 如何调 gRPC</li>
+<li><code>VarifyServer/server.js</code> → 验证码与邮件</li>
+<li><code>StatusServer/StatusServiceImpl.cpp</code> → 如何选 ChatServer、发 token</li>
+<li><code>GateServer/MysqlDao.cpp</code> &#x2F; <code>RedisMgr.cpp</code> → 持久化与缓存细节</li>
+</ol>
+<hr>
+<h2 id="8-设计思想小结（面试-自测可用）"><a href="#8-设计思想小结（面试-自测可用）" class="headerlink" title="8. 设计思想小结（面试&#x2F;自测可用）"></a>8. 设计思想小结（面试&#x2F;自测可用）</h2><ol>
+<li><strong>网关模式</strong>：客户端只打一个 HTTP 入口，降低耦合。</li>
+<li><strong>服务拆分</strong>：验证码、状态分配、业务网关职责分离，可独立扩容。</li>
+<li><strong>同步短请求用 HTTP；内部高性能调用用 gRPC</strong>。</li>
+<li><strong>热点短数据放 Redis，长期数据放 MySQL</strong>。</li>
+<li><strong>连接池</strong>：MySQL &#x2F; Redis &#x2F; gRPC Stub 池，提升并发。</li>
+<li><strong>IO 线程池</strong>：<code>AsioIOServicePool</code> 提高 GateServer 并发处理能力。</li>
+</ol>
+<hr>
+<h2 id="9-本仓库目录速查"><a href="#9-本仓库目录速查" class="headerlink" title="9. 本仓库目录速查"></a>9. 本仓库目录速查</h2><figure class="highlight text"><table><tr><td class="code"><pre><span class="line">chatProject/</span><br><span class="line">├── chat/                 # Qt 客户端</span><br><span class="line">├── GateServer/           # HTTP 网关</span><br><span class="line">├── VarifyServer/         # Node 验证码服务</span><br><span class="line">├── StatusServer/         # gRPC 状态/分配服务</span><br><span class="line">└── PROJECT_LEARNING.md   # 本学习文档</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="10-练习建议"><a href="#10-练习建议" class="headerlink" title="10. 练习建议"></a>10. 练习建议</h2><p>学完后可用下面问题自测：</p>
+<ol>
+<li>为什么客户端不直接连 VarifyServer？</li>
+<li>验证码为什么放 Redis 而不是 MySQL？</li>
+<li>注册时 GateServer 如何确认“这是刚才发到邮箱的码”？</li>
+<li>登录成功后为什么还要找 StatusServer？</li>
+<li><code>xorString</code> 是加密还是混淆？生产环境应如何改进？</li>
+</ol>
+<p>若某题答不上来，回到第 4、5、8 节对应源码再看一遍即可。</p>
+]]></content>
+      <categories>
+        <category>全栈聊天项目</category>
+      </categories>
+      <tags>
+        <tag>全栈聊天项目</tag>
         <tag>C++</tag>
       </tags>
   </entry>
@@ -18,12 +1299,16 @@
     <url>/2026/09/17/hello-world/</url>
     <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
 <h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+
 <p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
 <h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+
 <p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
 <h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+
 <p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
 <h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+
 <p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
 ]]></content>
   </entry>
