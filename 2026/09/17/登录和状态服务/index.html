@@ -20,12 +20,12 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="ChatProject 学习指南本文档是总览入口：先建立全局印象，再按「端」深入阅读 docs&#x2F; 下的分篇文档。 每篇分篇结构统一为：  模块联系：该端内部模块如何协作   模块功能：各文件 &#x2F; 类职责   代码讲解：关键代码块逐段说明   分篇文档索引（推荐阅读顺序）   顺序 文档 对应目录 内容侧重    0 docs&#x2F;00-总览.md — 端与端关系、阅读路线   1">
+  <meta name="description" content="ChatProject 学习指南本文档是总览入口：先建立全局印象，再按「端」深入阅读 docs&#x2F; 下的分篇文档。 每篇分篇结构统一为：  模块联系：该端内部模块如何协作   模块功能：各文件 &#x2F; 类职责   代码讲解：关键代码块逐段说明     分篇文档索引（推荐阅读顺序）    顺序 文档 对应目录 内容侧重     0 docs&#x2F;00-总览.md — 端与端关系、阅读路线   1 docs&#x2F;0">
 <meta property="og:type" content="article">
 <meta property="og:title" content="登录和状态服务">
 <meta property="og:url" content="http://example.com/2026/09/17/%E7%99%BB%E5%BD%95%E5%92%8C%E7%8A%B6%E6%80%81%E6%9C%8D%E5%8A%A1/index.html">
 <meta property="og:site_name" content="Sunny-Rainbow&#39;s Blog">
-<meta property="og:description" content="ChatProject 学习指南本文档是总览入口：先建立全局印象，再按「端」深入阅读 docs&#x2F; 下的分篇文档。 每篇分篇结构统一为：  模块联系：该端内部模块如何协作   模块功能：各文件 &#x2F; 类职责   代码讲解：关键代码块逐段说明   分篇文档索引（推荐阅读顺序）   顺序 文档 对应目录 内容侧重    0 docs&#x2F;00-总览.md — 端与端关系、阅读路线   1">
+<meta property="og:description" content="ChatProject 学习指南本文档是总览入口：先建立全局印象，再按「端」深入阅读 docs&#x2F; 下的分篇文档。 每篇分篇结构统一为：  模块联系：该端内部模块如何协作   模块功能：各文件 &#x2F; 类职责   代码讲解：关键代码块逐段说明     分篇文档索引（推荐阅读顺序）    顺序 文档 对应目录 内容侧重     0 docs&#x2F;00-总览.md — 端与端关系、阅读路线   1 docs&#x2F;0">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-09-17T14:30:51.000Z">
 <meta property="article:modified_time" content="2026-09-18T08:38:48.991Z">
@@ -253,11 +253,12 @@
 <p>每篇分篇结构统一为：</p>
 <ol>
 <li><strong>模块联系</strong>：该端内部模块如何协作  </li>
-<li><strong>模块功能</strong>：各文件 &#x2F; 类职责  </li>
-<li><strong>代码讲解</strong>：关键代码块逐段说明</li>
+<li><strong>模块功能</strong>：各文件 / 类职责  </li>
+<li><strong>代码讲解</strong>：关键代码块逐段说明  </li>
 </ol>
 <hr>
-<h2 id="分篇文档索引（推荐阅读顺序）"><a href="#分篇文档索引（推荐阅读顺序）" class="headerlink" title="分篇文档索引（推荐阅读顺序）"></a>分篇文档索引（推荐阅读顺序）</h2><table>
+<h2 id="分篇文档索引（推荐阅读顺序）"><a href="#分篇文档索引（推荐阅读顺序）" class="headerlink" title="分篇文档索引（推荐阅读顺序）"></a>分篇文档索引（推荐阅读顺序）</h2><div class="table-container">
+<table>
 <thead>
 <tr>
 <th>顺序</th>
@@ -266,68 +267,73 @@
 <th>内容侧重</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>0</td>
-<td><a href="./docs/00-%E6%80%BB%E8%A7%88.md">docs&#x2F;00-总览.md</a></td>
+<td><a href="./docs/00-总览.md">docs/00-总览.md</a></td>
 <td>—</td>
 <td>端与端关系、阅读路线</td>
 </tr>
 <tr>
 <td>1</td>
-<td><a href="./docs/01-%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%AF%87.md">docs&#x2F;01-客户端篇.md</a></td>
+<td><a href="./docs/01-客户端篇.md">docs/01-客户端篇.md</a></td>
 <td><code>chat/</code></td>
 <td>Qt UI、HttpMgr、登录注册重置</td>
 </tr>
 <tr>
 <td>2</td>
-<td><a href="./docs/02-%E7%BD%91%E5%85%B3%E7%AF%87.md">docs&#x2F;02-网关篇.md</a></td>
+<td><a href="./docs/02-网关篇.md">docs/02-网关篇.md</a></td>
 <td><code>GateServer/</code></td>
-<td>HTTP 入口、业务编排、gRPC&#x2F;Redis&#x2F;MySQL</td>
+<td>HTTP 入口、业务编排、gRPC/Redis/MySQL</td>
 </tr>
 <tr>
 <td>3</td>
-<td><a href="./docs/03-%E9%AA%8C%E8%AF%81%E7%A0%81%E6%9C%8D%E5%8A%A1%E7%AF%87.md">docs&#x2F;03-验证码服务篇.md</a></td>
+<td><a href="./docs/03-验证码服务篇.md">docs/03-验证码服务篇.md</a></td>
 <td><code>VarifyServer/</code></td>
 <td>Node gRPC、发邮件、写 Redis</td>
 </tr>
 <tr>
 <td>4</td>
-<td><a href="./docs/04-%E7%8A%B6%E6%80%81%E6%9C%8D%E5%8A%A1%E7%AF%87.md">docs&#x2F;04-状态服务篇.md</a></td>
+<td><a href="./docs/04-状态服务篇.md">docs/04-状态服务篇.md</a></td>
 <td><code>StatusServer/</code></td>
 <td>分配 ChatServer、签发 Token</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <p>下文保留精简总览（架构图、协议表、启动顺序），细节以分篇为准。</p>
 <hr>
-<h2 id="1-项目全景"><a href="#1-项目全景" class="headerlink" title="1. 项目全景"></a>1. 项目全景</h2><p>本项目是一个<strong>分布式即时通讯（IM）前置系统</strong>：客户端先通过 HTTP 完成注册&#x2F;登录，再准备连接聊天服务器进行长连接通信。</p>
+<h2 id="1-项目全景"><a href="#1-项目全景" class="headerlink" title="1. 项目全景"></a>1. 项目全景</h2><p>本项目是一个<strong>分布式即时通讯（IM）前置系统</strong>：客户端先通过 HTTP 完成注册/登录，再准备连接聊天服务器进行长连接通信。</p>
 <p>当前仓库主要模块：</p>
+<div class="table-container">
 <table>
 <thead>
 <tr>
 <th>目录</th>
 <th>角色</th>
-<th>语言 &#x2F; 框架</th>
+<th>语言 / 框架</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td><code>chat/</code></td>
 <td>Qt 桌面客户端</td>
-<td>C++ &#x2F; Qt 6</td>
+<td>C++ / Qt 6</td>
 </tr>
 <tr>
 <td><code>GateServer/</code></td>
 <td>HTTP 网关（对外入口）</td>
-<td>C++ &#x2F; Boost.Asio + Beast</td>
+<td>C++ / Boost.Asio + Beast</td>
 </tr>
 <tr>
 <td><code>VarifyServer/</code></td>
 <td>邮箱验证码服务</td>
-<td>Node.js &#x2F; gRPC</td>
+<td>Node.js / gRPC</td>
 </tr>
 <tr>
 <td><code>StatusServer/</code></td>
 <td>状态与聊天服分配服务</td>
-<td>C++ &#x2F; gRPC</td>
+<td>C++ / gRPC</td>
 </tr>
 <tr>
 <td>MySQL</td>
@@ -339,23 +345,25 @@
 <td>验证码等短期缓存</td>
 <td>内存 KV</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <blockquote>
-<p>说明：<code>StatusServer</code> 的配置里已经预留了 <code>chatserver1/2</code>（聊天业务服）。客户端登录成功后会拿到 host&#x2F;token，用于后续 TCP 长连接；ChatServer 本体可能在后续课程&#x2F;其他仓库中完善。</p>
+<p>说明：<code>StatusServer</code> 的配置里已经预留了 <code>chatserver1/2</code>（聊天业务服）。客户端登录成功后会拿到 host/token，用于后续 TCP 长连接；ChatServer 本体可能在后续课程/其他仓库中完善。</p>
 </blockquote>
 <hr>
 <h2 id="2-整体架构图"><a href="#2-整体架构图" class="headerlink" title="2. 整体架构图"></a>2. 整体架构图</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">┌────────────────────┐</span><br><span class="line">│   Qt 客户端 chat   │</span><br><span class="line">│  (登录/注册/重置)   │</span><br><span class="line">└─────────┬──────────┘</span><br><span class="line">          │ HTTP + JSON</span><br><span class="line">          │ (localhost:8080)</span><br><span class="line">          ▼</span><br><span class="line">┌────────────────────┐         gRPC          ┌────────────────────┐</span><br><span class="line">│     GateServer     │ ────────────────────► │   VarifyServer     │</span><br><span class="line">│   HTTP 网关 :8080  │   GetVarifyCode       │  发邮件验证码 :50051 │</span><br><span class="line">│                    │                       └─────────┬──────────┘</span><br><span class="line">│                    │                                 │</span><br><span class="line">│                    │         gRPC                    │ 写验证码</span><br><span class="line">│                    │ ────────────────────► ┌─────────┴──────────┐</span><br><span class="line">│                    │   GetChatServer       │       Redis        │</span><br><span class="line">│                    │ ◄──────────────────── │   code_&lt;email&gt;     │</span><br><span class="line">│                    │                       └────────────────────┘</span><br><span class="line">│                    │</span><br><span class="line">│                    │ SQL / 连接池</span><br><span class="line">│                    ▼</span><br><span class="line">│              ┌──────────┐</span><br><span class="line">│              │  MySQL   │  user 表（用户名/邮箱/密码）</span><br><span class="line">│              └──────────┘</span><br><span class="line">│</span><br><span class="line">│   登录成功后返回：uid / token / chat host</span><br><span class="line">└────────────────────────────────────────────</span><br><span class="line">                      │</span><br><span class="line">                      ▼（后续阶段）</span><br><span class="line">              ┌────────────────┐</span><br><span class="line">              │  ChatServer(s) │  TCP 长连接聊天</span><br><span class="line">              └────────────────┘</span><br><span class="line">                      ▲</span><br><span class="line">                      │ 由 StatusServer 按策略分配</span><br><span class="line">              ┌───────┴────────┐</span><br><span class="line">              │  StatusServer  │  gRPC :50052</span><br><span class="line">              └────────────────┘</span><br></pre></td></tr></table></figure>
-
 <p><strong>记忆口诀：</strong></p>
 <ul>
 <li>客户端<strong>只认识 GateServer</strong>（HTTP）</li>
-<li>GateServer <strong>对外当门面，对内调 gRPC &#x2F; Redis &#x2F; MySQL</strong></li>
+<li>GateServer <strong>对外当门面，对内调 gRPC / Redis / MySQL</strong></li>
 <li>VarifyServer <strong>只管验证码邮件 + 把验证码写 Redis</strong></li>
 <li>StatusServer <strong>只管“这个用户该连哪台聊天服”</strong></li>
 </ul>
 <hr>
 <h2 id="3-各模块职责与技术栈"><a href="#3-各模块职责与技术栈" class="headerlink" title="3. 各模块职责与技术栈"></a>3. 各模块职责与技术栈</h2><h3 id="3-1-Qt-客户端-chat"><a href="#3-1-Qt-客户端-chat" class="headerlink" title="3.1 Qt 客户端 chat/"></a>3.1 Qt 客户端 <code>chat/</code></h3><p><strong>职责：</strong> 用户界面与请求发起（登录、注册、重置密码）。</p>
 <p><strong>主要技术：</strong></p>
+<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -363,7 +371,8 @@
 <th>用途</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>Qt Widgets</td>
 <td>窗口、输入框、按钮、<code>QStackedWidget</code> 翻页</td>
 </tr>
@@ -372,8 +381,8 @@
 <td>发 HTTP POST</td>
 </tr>
 <tr>
-<td>QJsonObject &#x2F; QJsonDocument</td>
-<td>组装&#x2F;解析 JSON</td>
+<td>QJsonObject / QJsonDocument</td>
+<td>组装/解析 JSON</td>
 </tr>
 <tr>
 <td>QTimer</td>
@@ -381,13 +390,15 @@
 </tr>
 <tr>
 <td>信号槽</td>
-<td><code>HttpMgr</code> 回包分发给登录&#x2F;注册模块</td>
+<td><code>HttpMgr</code> 回包分发给登录/注册模块</td>
 </tr>
 <tr>
 <td><code>xorString</code></td>
 <td>密码异或“简单加密”后再上传</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <p><strong>关键文件：</strong></p>
 <ul>
 <li><code>httpmgr.cpp</code>：统一发 HTTP，按 <code>Modules</code> 转发回包</li>
@@ -399,11 +410,11 @@
 </ul>
 <p><strong>客户端配置示例：</strong></p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[GateServer]</span></span><br><span class="line"><span class="attr">host</span>=localhost</span><br><span class="line"><span class="attr">port</span>=<span class="number">8080</span></span><br></pre></td></tr></table></figure>
-
 <p>启动后拼出：<code>http://localhost:8080</code></p>
 <hr>
 <h3 id="3-2-GateServer（HTTP-网关）"><a href="#3-2-GateServer（HTTP-网关）" class="headerlink" title="3.2 GateServer（HTTP 网关）"></a>3.2 GateServer（HTTP 网关）</h3><p><strong>职责：</strong> 对外提供 REST 风格 HTTP 接口；对内编排验证码、注册、登录、重置密码。</p>
 <p><strong>主要技术：</strong></p>
+<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -411,7 +422,8 @@
 <th>用途</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>Boost.Asio</td>
 <td>异步 IO、线程池 <code>AsioIOServicePool</code></td>
 </tr>
@@ -421,7 +433,7 @@
 </tr>
 <tr>
 <td>JsonCpp</td>
-<td>解析请求体 &#x2F; 构造响应</td>
+<td>解析请求体 / 构造响应</td>
 </tr>
 <tr>
 <td>gRPC C++</td>
@@ -432,19 +444,22 @@
 <td>RPC 消息定义（<code>message.proto</code>）</td>
 </tr>
 <tr>
-<td>libmysql &#x2F; 连接池</td>
+<td>libmysql / 连接池</td>
 <td>读写用户表</td>
 </tr>
 <tr>
-<td>hiredis &#x2F; Redis 连接池</td>
+<td>hiredis / Redis 连接池</td>
 <td>读验证码 <code>code_&lt;email&gt;</code></td>
 </tr>
 <tr>
 <td>单例 (<code>Singleton</code>)</td>
 <td><code>LogicSystem</code>、<code>RedisMgr</code>、<code>MysqlMgr</code> 等</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <p><strong>对外 HTTP 接口（见 <code>LogicSystem.cpp</code>）：</strong></p>
+<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -453,7 +468,8 @@
 <th>作用</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td><code>/get_varifycode</code></td>
 <td>POST</td>
 <td>向 VarifyServer 要验证码并发邮件</td>
@@ -473,13 +489,15 @@
 <td>POST</td>
 <td>按邮箱验密，再向 StatusServer 要聊天服</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <p><strong>配置 <code>GateServer/config.ini</code>：</strong></p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[GateServer]</span></span><br><span class="line"><span class="attr">Port</span> = <span class="number">8080</span></span><br><span class="line"><span class="section">[VarifyServer]</span></span><br><span class="line"><span class="attr">Host</span> = <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"><span class="attr">Port</span> = <span class="number">50051</span></span><br><span class="line"><span class="section">[StatusServer]</span></span><br><span class="line"><span class="attr">Host</span> = <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"><span class="attr">Port</span> = <span class="number">50052</span></span><br><span class="line"><span class="section">[Mysql]</span></span><br><span class="line">...</span><br><span class="line"><span class="section">[Redis]</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
-
 <hr>
 <h3 id="3-3-VarifyServer（验证码服务）"><a href="#3-3-VarifyServer（验证码服务）" class="headerlink" title="3.3 VarifyServer（验证码服务）"></a>3.3 VarifyServer（验证码服务）</h3><p><strong>职责：</strong> 收到 gRPC 请求后生成验证码、写入 Redis、发邮件。</p>
 <p><strong>主要技术：</strong></p>
+<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -487,7 +505,8 @@
 <th>用途</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>Node.js</td>
 <td>服务运行时</td>
 </tr>
@@ -507,21 +526,23 @@
 <td><code>nodemailer</code></td>
 <td>SMTP 发邮件</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <p><strong>关键文件：</strong></p>
 <ul>
 <li><code>server.js</code>：实现 <code>GetVarifyCode</code></li>
 <li><code>email.js</code>：发信</li>
-<li><code>redis.js</code>：<code>GetRedis</code> &#x2F; <code>SetRedisExpire</code></li>
+<li><code>redis.js</code>：<code>GetRedis</code> / <code>SetRedisExpire</code></li>
 <li><code>config.json</code>：邮箱账号、Redis 地址</li>
 </ul>
 <p><strong>Redis Key 约定：</strong></p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">code_&lt;邮箱&gt;  =  验证码字符串</span><br><span class="line">过期时间约 600 秒（10 分钟）</span><br></pre></td></tr></table></figure>
-
-<p>GateServer 注册&#x2F;重置时用同一前缀 <code>CODEPREFIX = &quot;code_&quot;</code> 去读，所以两边必须连<strong>同一套 Redis</strong>。</p>
+<p>GateServer 注册/重置时用同一前缀 <code>CODEPREFIX = &quot;code_&quot;</code> 去读，所以两边必须连<strong>同一套 Redis</strong>。</p>
 <hr>
-<h3 id="3-4-StatusServer（状态-分配服务）"><a href="#3-4-StatusServer（状态-分配服务）" class="headerlink" title="3.4 StatusServer（状态 &#x2F; 分配服务）"></a>3.4 StatusServer（状态 &#x2F; 分配服务）</h3><p><strong>职责：</strong> 登录成功后，为用户分配一台 ChatServer，并生成 token。</p>
+<h3 id="3-4-StatusServer（状态-分配服务）"><a href="#3-4-StatusServer（状态-分配服务）" class="headerlink" title="3.4 StatusServer（状态 / 分配服务）"></a>3.4 StatusServer（状态 / 分配服务）</h3><p><strong>职责：</strong> 登录成功后，为用户分配一台 ChatServer，并生成 token。</p>
 <p><strong>主要技术：</strong></p>
+<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -529,13 +550,14 @@
 <th>用途</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>gRPC C++</td>
 <td>提供 <code>StatusService.GetChatServer</code></td>
 </tr>
 <tr>
 <td>Protobuf</td>
-<td>请求 uid，返回 host&#x2F;port&#x2F;token</td>
+<td>请求 uid，返回 host/port/token</td>
 </tr>
 <tr>
 <td>Boost.UUID</td>
@@ -549,14 +571,15 @@
 <td>ConfigMgr</td>
 <td>读取多台 chatserver 配置</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <p><strong>接口语义：</strong></p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GetChatServer(uid) → &#123; host, port, token, error &#125;</span><br></pre></td></tr></table></figure>
-
 <p>GateServer 登录成功后调用它，再把结果返回给 Qt 客户端。</p>
 <hr>
 <h3 id="3-5-MySQL"><a href="#3-5-MySQL" class="headerlink" title="3.5 MySQL"></a>3.5 MySQL</h3><p><strong>职责：</strong> 持久化用户账号。</p>
-<p>典型字段（以 <code>user</code> 表 &#x2F; <code>reg_user</code> 存储过程为准）：</p>
+<p>典型字段（以 <code>user</code> 表 / <code>reg_user</code> 存储过程为准）：</p>
 <ul>
 <li><code>uid</code></li>
 <li><code>name</code>（用户名）</li>
@@ -574,15 +597,14 @@
 <p>本项目中最关键的用途：</p>
 <ol>
 <li>VarifyServer 写入 <code>code_邮箱</code></li>
-<li>GateServer 注册&#x2F;重置时读取并比对</li>
+<li>GateServer 注册/重置时读取并比对</li>
 </ol>
 <p>其他用途（StatusServer）：登录计数、token 缓存等（代码中有相关设计）。</p>
 <hr>
 <h2 id="4-核心业务流程（对照源码学习）"><a href="#4-核心业务流程（对照源码学习）" class="headerlink" title="4. 核心业务流程（对照源码学习）"></a>4. 核心业务流程（对照源码学习）</h2><h3 id="4-1-获取验证码"><a href="#4-1-获取验证码" class="headerlink" title="4.1 获取验证码"></a>4.1 获取验证码</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Qt 填邮箱</span><br><span class="line">  → POST /get_varifycode &#123; email &#125;</span><br><span class="line">  → GateServer</span><br><span class="line">  → gRPC GetVarifyCode</span><br><span class="line">  → VarifyServer：生成码 → Redis SET → 发邮件</span><br><span class="line">  → 回包 error=0</span><br><span class="line">  → Qt 提示“已发送”，按钮 60s 倒计时</span><br></pre></td></tr></table></figure>
-
 <h3 id="4-2-注册"><a href="#4-2-注册" class="headerlink" title="4.2 注册"></a>4.2 注册</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Qt 提交 &#123; user, email, passwd(xor), confirm(xor), varifycode &#125;</span><br><span class="line">  → POST /user_register</span><br><span class="line">  → GateServer：</span><br><span class="line">       1) Redis GET code_email，比对验证码</span><br><span class="line">       2) MySQL CALL reg_user</span><br><span class="line">  → 成功返回 uid</span><br><span class="line">  → Qt 切到 page_2，5 秒后回登录页</span><br></pre></td></tr></table></figure>
-
 <p>存储过程常见返回值含义（结合你之前日志）：</p>
+<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -590,7 +612,8 @@
 <th>含义（常见约定）</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>&gt;0</td>
 <td>成功，值为 uid</td>
 </tr>
@@ -600,20 +623,21 @@
 </tr>
 <tr>
 <td>-1</td>
-<td>异常 &#x2F; 失败</td>
+<td>异常 / 失败</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <h3 id="4-3-登录"><a href="#4-3-登录" class="headerlink" title="4.3 登录"></a>4.3 登录</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Qt 提交 &#123; email, passwd(xor) &#125;</span><br><span class="line">  → POST /user_login</span><br><span class="line">  → GateServer：</span><br><span class="line">       1) MySQL 按 email 查用户并比对 pwd</span><br><span class="line">       2) gRPC StatusServer.GetChatServer(uid)</span><br><span class="line">  → 返回 &#123; uid, token, host, ... &#125;</span><br><span class="line">  → Qt 后续可用这些信息去连 ChatServer</span><br></pre></td></tr></table></figure>
-
 <p>注意：</p>
 <ul>
 <li>密码在注册和登录时都应经过 <code>xorString</code>，库里存的是异或后的串。</li>
 <li>登录按<strong>邮箱</strong>查库（与客户端表单一致）。</li>
 </ul>
 <h3 id="4-4-重置密码"><a href="#4-4-重置密码" class="headerlink" title="4.4 重置密码"></a>4.4 重置密码</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Qt 提交邮箱 + 验证码 + 新密码(xor)</span><br><span class="line">  → POST /reset_pwd</span><br><span class="line">  → GateServer 校验 Redis 验证码 → UpdatePwd</span><br></pre></td></tr></table></figure>
-
 <hr>
-<h2 id="5-通信协议对照表"><a href="#5-通信协议对照表" class="headerlink" title="5. 通信协议对照表"></a>5. 通信协议对照表</h2><table>
+<h2 id="5-通信协议对照表"><a href="#5-通信协议对照表" class="headerlink" title="5. 通信协议对照表"></a>5. 通信协议对照表</h2><div class="table-container">
+<table>
 <thead>
 <tr>
 <th>谁 → 谁</th>
@@ -622,7 +646,8 @@
 <th>典型端口</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>Qt → GateServer</td>
 <td>HTTP</td>
 <td>JSON</td>
@@ -641,7 +666,7 @@
 <td>50052</td>
 </tr>
 <tr>
-<td>VarifyServer &#x2F; GateServer → Redis</td>
+<td>VarifyServer / GateServer → Redis</td>
 <td>Redis 协议</td>
 <td>字符串 KV</td>
 <td>6380</td>
@@ -649,18 +674,19 @@
 <tr>
 <td>GateServer → MySQL</td>
 <td>MySQL 协议</td>
-<td>SQL &#x2F; 存储过程</td>
+<td>SQL / 存储过程</td>
 <td>3307（你的环境）</td>
 </tr>
 <tr>
 <td>Qt → ChatServer（后续）</td>
 <td>TCP（自定义包）</td>
 <td>业务协议</td>
-<td>8990&#x2F;8991</td>
+<td>8990/8991</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <h3 id="Protobuf-服务一览（message-proto）"><a href="#Protobuf-服务一览（message-proto）" class="headerlink" title="Protobuf 服务一览（message.proto）"></a>Protobuf 服务一览（<code>message.proto</code>）</h3><figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">service </span><span class="title class_">VarifyService</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">rpc</span> GetVarifyCode (GetVarifyReq) <span class="keyword">returns</span> (GetVarifyRsp)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">service </span><span class="title class_">StatusService</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">rpc</span> GetChatServer (GetChatServerReq) <span class="keyword">returns</span> (GetChatServerRsp)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <hr>
 <h2 id="6-启动顺序建议"><a href="#6-启动顺序建议" class="headerlink" title="6. 启动顺序建议"></a>6. 启动顺序建议</h2><p>本地联调时建议按依赖从下往上启动：</p>
 <ol>
@@ -672,6 +698,7 @@
 <li><strong>Qt 客户端</strong></li>
 </ol>
 <p>缺一不可的常见现象：</p>
+<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -679,9 +706,10 @@
 <th>常见原因</th>
 </tr>
 </thead>
-<tbody><tr>
-<td>参数错误 &#x2F; RPCFailed</td>
-<td>Gate 连不上 Varify&#x2F;Status，或配置 Host&#x2F;Port 写错大小写</td>
+<tbody>
+<tr>
+<td>参数错误 / RPCFailed</td>
+<td>Gate 连不上 Varify/Status，或配置 Host/Port 写错大小写</td>
 </tr>
 <tr>
 <td>Redis Connection is closed</td>
@@ -689,38 +717,39 @@
 </tr>
 <tr>
 <td>user or email exist</td>
-<td>邮箱&#x2F;用户名已注册</td>
+<td>邮箱/用户名已注册</td>
 </tr>
 <tr>
 <td>user pwd not match</td>
 <td>曾按用户名查库、或密码未 xor、或邮箱不存在</td>
 </tr>
-</tbody></table>
+</tbody>
+</table>
+</div>
 <hr>
 <h2 id="7-推荐源码阅读顺序"><a href="#7-推荐源码阅读顺序" class="headerlink" title="7. 推荐源码阅读顺序"></a>7. 推荐源码阅读顺序</h2><p>按“从外到内”读，更容易建立全局图：</p>
 <ol>
 <li><code>chat/main.cpp</code> → 读 <code>config.ini</code>，得到 <code>gate_url_prefix</code></li>
 <li><code>chat/httpmgr.cpp</code> → HTTP 怎么发、信号怎么分模块</li>
-<li><code>chat/registerdialog.cpp</code> &#x2F; <code>logindialog.cpp</code> → 业务请求字段</li>
+<li><code>chat/registerdialog.cpp</code> / <code>logindialog.cpp</code> → 业务请求字段</li>
 <li><code>GateServer/CServer.cpp</code> + <code>HttpConnection.cpp</code> → 连接怎么接、HTTP 怎么读</li>
 <li><code>GateServer/LogicSystem.cpp</code> → <strong>最重要的业务编排</strong></li>
-<li><code>GateServer/VarifyGrpcClient.*</code> &#x2F; <code>StatusGrpcClient.*</code> → 如何调 gRPC</li>
+<li><code>GateServer/VarifyGrpcClient.*</code> / <code>StatusGrpcClient.*</code> → 如何调 gRPC</li>
 <li><code>VarifyServer/server.js</code> → 验证码与邮件</li>
 <li><code>StatusServer/StatusServiceImpl.cpp</code> → 如何选 ChatServer、发 token</li>
-<li><code>GateServer/MysqlDao.cpp</code> &#x2F; <code>RedisMgr.cpp</code> → 持久化与缓存细节</li>
+<li><code>GateServer/MysqlDao.cpp</code> / <code>RedisMgr.cpp</code> → 持久化与缓存细节</li>
 </ol>
 <hr>
-<h2 id="8-设计思想小结（面试-自测可用）"><a href="#8-设计思想小结（面试-自测可用）" class="headerlink" title="8. 设计思想小结（面试&#x2F;自测可用）"></a>8. 设计思想小结（面试&#x2F;自测可用）</h2><ol>
+<h2 id="8-设计思想小结（面试-自测可用）"><a href="#8-设计思想小结（面试-自测可用）" class="headerlink" title="8. 设计思想小结（面试/自测可用）"></a>8. 设计思想小结（面试/自测可用）</h2><ol>
 <li><strong>网关模式</strong>：客户端只打一个 HTTP 入口，降低耦合。</li>
 <li><strong>服务拆分</strong>：验证码、状态分配、业务网关职责分离，可独立扩容。</li>
 <li><strong>同步短请求用 HTTP；内部高性能调用用 gRPC</strong>。</li>
 <li><strong>热点短数据放 Redis，长期数据放 MySQL</strong>。</li>
-<li><strong>连接池</strong>：MySQL &#x2F; Redis &#x2F; gRPC Stub 池，提升并发。</li>
+<li><strong>连接池</strong>：MySQL / Redis / gRPC Stub 池，提升并发。</li>
 <li><strong>IO 线程池</strong>：<code>AsioIOServicePool</code> 提高 GateServer 并发处理能力。</li>
 </ol>
 <hr>
 <h2 id="9-本仓库目录速查"><a href="#9-本仓库目录速查" class="headerlink" title="9. 本仓库目录速查"></a>9. 本仓库目录速查</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">chatProject/</span><br><span class="line">├── chat/                 # Qt 客户端</span><br><span class="line">├── GateServer/           # HTTP 网关</span><br><span class="line">├── VarifyServer/         # Node 验证码服务</span><br><span class="line">├── StatusServer/         # gRPC 状态/分配服务</span><br><span class="line">└── PROJECT_LEARNING.md   # 本学习文档</span><br></pre></td></tr></table></figure>
-
 <hr>
 <h2 id="10-练习建议"><a href="#10-练习建议" class="headerlink" title="10. 练习建议"></a>10. 练习建议</h2><p>学完后可用下面问题自测：</p>
 <ol>

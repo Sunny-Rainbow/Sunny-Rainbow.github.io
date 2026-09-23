@@ -252,7 +252,7 @@
 <p>大模型生成是自回归，每次只输出 1 个新 token。每一步做 Attention 时，<strong>历史 token 的 K、V 向量不需要重复重新计算，直接复用上次保存的 K、V，只计算新 token 的 K、V</strong>，大幅减少计算量，提升推理速度、降低延迟。</p>
 </blockquote>
 <ul>
-<li>不使用 KV Cache：每 decode 一步，把<strong>全部历史 + 新 token</strong>全部输入模型，重新对所有 token 算 K&#x2F;Q&#x2F;V，序列越长，算力开销越大（(O(n^2))）。</li>
+<li>不使用 KV Cache：每 decode 一步，把<strong>全部历史 + 新 token</strong>全部输入模型，重新对所有 token 算 K/Q/V，序列越长，算力开销越大（(O(n^2))）。</li>
 <li>使用 KV Cache：只对<strong>新生成 token</strong>计算 Q；历史 token 的 K、V 直接从缓存读取，只追加新 token 的 K、V 进缓存。Decode 阶段复杂度由(O(n^2))变成(O(n))。</li>
 </ul>
 <p><strong>进阶扩展</strong></p>
@@ -262,26 +262,26 @@
 <blockquote>
 <p>Q 永远实时计算；K、V 缓存复用。</p>
 </blockquote>
-<ol start="2">
+<ol>
 <li><strong>PagedAttention（你代码里的方案）</strong><br>传统 KV Cache 是连续显存数组；PagedAttention 把 KV 缓存拆成固定大小<strong>block（页）</strong>，用<code>block_table</code>记录每条序列占用哪些 block，<code>slot_mapping</code>映射 token 到物理 slot。</li>
 </ol>
 <ul>
 <li>好处：显存分配按需、碎片化更低，支持多序列并发调度；</li>
 <li>代价：需要专门的显存管理器调度 block，也就是你代码<code>allocate_kv_cache</code>预分配一大片 KV 显存池。</li>
 </ul>
-<ol start="3">
-<li><strong>代价</strong><br>KV Cache 需要占用额外 GPU 显存，序列越长、batch 越大，占用显存越高；这也是 vLLM&#x2F;nano-vLLM 要做显存利用率估算、限制最大并发序列的原因。</li>
+<ol>
+<li><strong>代价</strong><br>KV Cache 需要占用额外 GPU 显存，序列越长、batch 越大，占用显存越高；这也是 vLLM/nano-vLLM 要做显存利用率估算、限制最大并发序列的原因。</li>
 </ol>
 <h1 id="2-PagedAttention-解决了什么问题？"><a href="#2-PagedAttention-解决了什么问题？" class="headerlink" title="2. PagedAttention 解决了什么问题？"></a>2. PagedAttention 解决了什么问题？</h1><p>一句话：PagedAttention 核心解决传统 KV Cache 带来的 GPU 显存碎片化问题，提升显存利用率，从而提升推理服务的并发吞吐。</p>
 <h2 id="传统连续-KV-Cache-有什么痛点（先讲痛点，再讲它解决了啥）"><a href="#传统连续-KV-Cache-有什么痛点（先讲痛点，再讲它解决了啥）" class="headerlink" title=". 传统连续 KV Cache 有什么痛点（先讲痛点，再讲它解决了啥）"></a>. 传统连续 KV Cache 有什么痛点（先讲痛点，再讲它解决了啥）</h2><p>传统实现：每个请求的 KV 存放在<strong>一块连续的 GPU 显存</strong>里。</p>
 <ol>
 <li><strong>显存碎片严重</strong><br>不同 prompt 长度、生成长度不一样。请求结束释放连续内存块，会留下大量大小不一的空洞；新请求如果找不到足够大的连续块，哪怕总显存够用，也无法分配，只能拒绝新请求。</li>
-<li><strong>内存分配 &#x2F; 释放开销大</strong><br>每次新建请求都要<code>cudaMalloc</code>，结束<code>cudaFree</code>，频繁调用 CUDA 内存 API，开销高。</li>
+<li><strong>内存分配 / 释放开销大</strong><br>每次新建请求都要<code>cudaMalloc</code>，结束<code>cudaFree</code>，频繁调用 CUDA 内存 API，开销高。</li>
 <li><strong>预分配策略保守</strong><br>为了保证最大序列，要一次性预分配<strong>最大长度</strong>的连续 KV 显存，很多 token 位置全程闲置，显存浪费巨大。</li>
 </ol>
 <h2 id="2-PagedAttention-怎么解决（核心思想：分页，类似-OS-虚拟内存）"><a href="#2-PagedAttention-怎么解决（核心思想：分页，类似-OS-虚拟内存）" class="headerlink" title="2. PagedAttention 怎么解决（核心思想：分页，类似 OS 虚拟内存）"></a>2. PagedAttention 怎么解决（核心思想：分页，类似 OS 虚拟内存）</h2><p>把整块 KV 缓存拆成<strong>固定大小的页（block，你代码里 block_size）</strong>。</p>
 <ul>
-<li>一个 block 存 N 个 token 的 K&#x2F;V（例如 block_size&#x3D;16，一页存 16 个 token）</li>
+<li>一个 block 存 N 个 token 的 K/V（例如 block_size=16，一页存 16 个 token）</li>
 <li>每个序列的 KV<strong>不需要连续显存</strong>；由<code>block_table</code>记录这个序列用到哪些离散 block 编号</li>
 <li><code>slot_mapping</code>：逻辑 token 位置 → KV cache 张量中物理 slot 索引，让 attention 内核能访问分散在不同 block 上的 KV</li>
 </ul>
@@ -291,7 +291,7 @@
 <h2 id="3-它解决的核心问题（面试分点背诵）"><a href="#3-它解决的核心问题（面试分点背诵）" class="headerlink" title="3. 它解决的核心问题（面试分点背诵）"></a>3. 它解决的核心问题（面试分点背诵）</h2><ol>
 <li>✅ <strong>消除 KV Cache 的显存外部碎片</strong><br>页面大小固定。请求结束只需要释放一个个独立 block，可以被其他请求复用；不需要找大块连续显存。总显存只要有空闲 page 就能分配，不再受连续空洞限制。</li>
 <li>✅ <strong>支持按需分配 KV 页面，减少显存浪费</strong><br>不用提前一次性分配最大序列长度的 KV；<strong>生成多少 token，分配多少 block</strong>。短请求不会占用超长预留空间，显存利用率大幅提升。</li>
-<li>✅ <strong>减少频繁 cuda malloc&#x2F;free，提升分配效率</strong><br>提前一次性预分配一大片 KV 显存池（就是你代码<code>allocate_kv_cache</code>），后续 block 只做池内管理，不再向 CUDA 申请释放显存。</li>
+<li>✅ <strong>减少频繁 cuda malloc/free，提升分配效率</strong><br>提前一次性预分配一大片 KV 显存池（就是你代码<code>allocate_kv_cache</code>），后续 block 只做池内管理，不再向 CUDA 申请释放显存。</li>
 <li>✅ <strong>支持高效的序列复用（prefix cache，前缀缓存）</strong><br>多个请求共享相同 prompt 前缀时，可以共享同一批 KV block，不需要重复保存相同前缀的 KV，进一步节省显存。</li>
 </ol>
 <h2 id="4-额外代价（面试官喜欢追问，一定要带上）"><a href="#4-额外代价（面试官喜欢追问，一定要带上）" class="headerlink" title="4. 额外代价（面试官喜欢追问，一定要带上）"></a>4. 额外代价（面试官喜欢追问，一定要带上）</h2><p>不是无代价：</p>
@@ -302,7 +302,7 @@
 <h2 id="5-精简口述版（面试直接说，约-1-分钟）"><a href="#5-精简口述版（面试直接说，约-1-分钟）" class="headerlink" title="5. 精简口述版（面试直接说，约 1 分钟）"></a>5. 精简口述版（面试直接说，约 1 分钟）</h2><blockquote>
 <p>PagedAttention 借鉴操作系统分页内存的思路，把 KV cache 切分为固定大小的 block。传统 KV Cache 需要为每个请求分配连续显存，很容易产生显存碎片，显存利用率低，限制并发。<br>PagedAttention 允许一条序列的 KV 存储在离散的显存 block 里，通过 block_table 页表管理，按需分配页面。解决了 KV Cache 的外部碎片问题，提高 GPU 显存利用率，让服务可以同时跑更多并发请求。代价是内核更复杂，会存在少量 block 内部碎片。</p>
 </blockquote>
-<h2 id="高频追问"><a href="#高频追问" class="headerlink" title="高频追问"></a>高频追问</h2><p>Q：slot_mapping 作用？<br>A：PagedAttention CUDA kernel 无法直接用 block_table(block_table在cpu)，<code>slot_mapping</code>把序列逻辑 token 位置，转换成 KV cache 张量里物理 slot 下标，给 attention kernel 用来寻址分散在不同 block 的 K&#x2F;V。(slot:block 里面存单个 tokenKV 的格子)</p>
+<h2 id="高频追问"><a href="#高频追问" class="headerlink" title="高频追问"></a>高频追问</h2><p>Q：slot_mapping 作用？<br>A：PagedAttention CUDA kernel 无法直接用 block_table(block_table在cpu)，<code>slot_mapping</code>把序列逻辑 token 位置，转换成 KV cache 张量里物理 slot 下标，给 attention kernel 用来寻址分散在不同 block 的 K/V。(slot:block 里面存单个 tokenKV 的格子)</p>
 <p>Q：和普通分页内存区别？<br>A：PagedAttention<strong>没有磁盘 swap</strong>，全部在 GPU 显存，不换出到内存；只是借用分页的地址映射思想。</p>
 <h1 id="FlashAttention"><a href="#FlashAttention" class="headerlink" title="FlashAttention"></a>FlashAttention</h1><h1 id="算子融合的常见策略"><a href="#算子融合的常见策略" class="headerlink" title="算子融合的常见策略"></a>算子融合的常见策略</h1><h1 id="GEMM-的常见优化方法"><a href="#GEMM-的常见优化方法" class="headerlink" title="GEMM 的常见优化方法"></a>GEMM 的常见优化方法</h1>
     </div>
