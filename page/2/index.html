@@ -249,12 +249,11 @@
 <p>每篇分篇结构统一为：</p>
 <ol>
 <li><strong>模块联系</strong>：该端内部模块如何协作  </li>
-<li><strong>模块功能</strong>：各文件 / 类职责  </li>
-<li><strong>代码讲解</strong>：关键代码块逐段说明  </li>
+<li><strong>模块功能</strong>：各文件 &#x2F; 类职责  </li>
+<li><strong>代码讲解</strong>：关键代码块逐段说明</li>
 </ol>
 <hr>
-<h2 id="分篇文档索引（推荐阅读顺序）"><a href="#分篇文档索引（推荐阅读顺序）" class="headerlink" title="分篇文档索引（推荐阅读顺序）"></a>分篇文档索引（推荐阅读顺序）</h2><div class="table-container">
-<table>
+<h2 id="分篇文档索引（推荐阅读顺序）"><a href="#分篇文档索引（推荐阅读顺序）" class="headerlink" title="分篇文档索引（推荐阅读顺序）"></a>分篇文档索引（推荐阅读顺序）</h2><table>
 <thead>
 <tr>
 <th>顺序</th>
@@ -263,73 +262,68 @@
 <th>内容侧重</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>0</td>
-<td><a href="./docs/00-总览.md">docs/00-总览.md</a></td>
+<td><a href="./docs/00-%E6%80%BB%E8%A7%88.md">docs&#x2F;00-总览.md</a></td>
 <td>—</td>
 <td>端与端关系、阅读路线</td>
 </tr>
 <tr>
 <td>1</td>
-<td><a href="./docs/01-客户端篇.md">docs/01-客户端篇.md</a></td>
+<td><a href="./docs/01-%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%AF%87.md">docs&#x2F;01-客户端篇.md</a></td>
 <td><code>chat/</code></td>
 <td>Qt UI、HttpMgr、登录注册重置</td>
 </tr>
 <tr>
 <td>2</td>
-<td><a href="./docs/02-网关篇.md">docs/02-网关篇.md</a></td>
+<td><a href="./docs/02-%E7%BD%91%E5%85%B3%E7%AF%87.md">docs&#x2F;02-网关篇.md</a></td>
 <td><code>GateServer/</code></td>
-<td>HTTP 入口、业务编排、gRPC/Redis/MySQL</td>
+<td>HTTP 入口、业务编排、gRPC&#x2F;Redis&#x2F;MySQL</td>
 </tr>
 <tr>
 <td>3</td>
-<td><a href="./docs/03-验证码服务篇.md">docs/03-验证码服务篇.md</a></td>
+<td><a href="./docs/03-%E9%AA%8C%E8%AF%81%E7%A0%81%E6%9C%8D%E5%8A%A1%E7%AF%87.md">docs&#x2F;03-验证码服务篇.md</a></td>
 <td><code>VarifyServer/</code></td>
 <td>Node gRPC、发邮件、写 Redis</td>
 </tr>
 <tr>
 <td>4</td>
-<td><a href="./docs/04-状态服务篇.md">docs/04-状态服务篇.md</a></td>
+<td><a href="./docs/04-%E7%8A%B6%E6%80%81%E6%9C%8D%E5%8A%A1%E7%AF%87.md">docs&#x2F;04-状态服务篇.md</a></td>
 <td><code>StatusServer/</code></td>
 <td>分配 ChatServer、签发 Token</td>
 </tr>
-</tbody>
-</table>
-</div>
+</tbody></table>
 <p>下文保留精简总览（架构图、协议表、启动顺序），细节以分篇为准。</p>
 <hr>
-<h2 id="1-项目全景"><a href="#1-项目全景" class="headerlink" title="1. 项目全景"></a>1. 项目全景</h2><p>本项目是一个<strong>分布式即时通讯（IM）前置系统</strong>：客户端先通过 HTTP 完成注册/登录，再准备连接聊天服务器进行长连接通信。</p>
+<h2 id="1-项目全景"><a href="#1-项目全景" class="headerlink" title="1. 项目全景"></a>1. 项目全景</h2><p>本项目是一个<strong>分布式即时通讯（IM）前置系统</strong>：客户端先通过 HTTP 完成注册&#x2F;登录，再准备连接聊天服务器进行长连接通信。</p>
 <p>当前仓库主要模块：</p>
-<div class="table-container">
 <table>
 <thead>
 <tr>
 <th>目录</th>
 <th>角色</th>
-<th>语言 / 框架</th>
+<th>语言 &#x2F; 框架</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td><code>chat/</code></td>
 <td>Qt 桌面客户端</td>
-<td>C++ / Qt 6</td>
+<td>C++ &#x2F; Qt 6</td>
 </tr>
 <tr>
 <td><code>GateServer/</code></td>
 <td>HTTP 网关（对外入口）</td>
-<td>C++ / Boost.Asio + Beast</td>
+<td>C++ &#x2F; Boost.Asio + Beast</td>
 </tr>
 <tr>
 <td><code>VarifyServer/</code></td>
 <td>邮箱验证码服务</td>
-<td>Node.js / gRPC</td>
+<td>Node.js &#x2F; gRPC</td>
 </tr>
 <tr>
 <td><code>StatusServer/</code></td>
 <td>状态与聊天服分配服务</td>
-<td>C++ / gRPC</td>
+<td>C++ &#x2F; gRPC</td>
 </tr>
 <tr>
 <td>MySQL</td>
@@ -341,25 +335,23 @@
 <td>验证码等短期缓存</td>
 <td>内存 KV</td>
 </tr>
-</tbody>
-</table>
-</div>
+</tbody></table>
 <blockquote>
-<p>说明：<code>StatusServer</code> 的配置里已经预留了 <code>chatserver1/2</code>（聊天业务服）。客户端登录成功后会拿到 host/token，用于后续 TCP 长连接；ChatServer 本体可能在后续课程/其他仓库中完善。</p>
+<p>说明：<code>StatusServer</code> 的配置里已经预留了 <code>chatserver1/2</code>（聊天业务服）。客户端登录成功后会拿到 host&#x2F;token，用于后续 TCP 长连接；ChatServer 本体可能在后续课程&#x2F;其他仓库中完善。</p>
 </blockquote>
 <hr>
 <h2 id="2-整体架构图"><a href="#2-整体架构图" class="headerlink" title="2. 整体架构图"></a>2. 整体架构图</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">┌────────────────────┐</span><br><span class="line">│   Qt 客户端 chat   │</span><br><span class="line">│  (登录/注册/重置)   │</span><br><span class="line">└─────────┬──────────┘</span><br><span class="line">          │ HTTP + JSON</span><br><span class="line">          │ (localhost:8080)</span><br><span class="line">          ▼</span><br><span class="line">┌────────────────────┐         gRPC          ┌────────────────────┐</span><br><span class="line">│     GateServer     │ ────────────────────► │   VarifyServer     │</span><br><span class="line">│   HTTP 网关 :8080  │   GetVarifyCode       │  发邮件验证码 :50051 │</span><br><span class="line">│                    │                       └─────────┬──────────┘</span><br><span class="line">│                    │                                 │</span><br><span class="line">│                    │         gRPC                    │ 写验证码</span><br><span class="line">│                    │ ────────────────────► ┌─────────┴──────────┐</span><br><span class="line">│                    │   GetChatServer       │       Redis        │</span><br><span class="line">│                    │ ◄──────────────────── │   code_&lt;email&gt;     │</span><br><span class="line">│                    │                       └────────────────────┘</span><br><span class="line">│                    │</span><br><span class="line">│                    │ SQL / 连接池</span><br><span class="line">│                    ▼</span><br><span class="line">│              ┌──────────┐</span><br><span class="line">│              │  MySQL   │  user 表（用户名/邮箱/密码）</span><br><span class="line">│              └──────────┘</span><br><span class="line">│</span><br><span class="line">│   登录成功后返回：uid / token / chat host</span><br><span class="line">└────────────────────────────────────────────</span><br><span class="line">                      │</span><br><span class="line">                      ▼（后续阶段）</span><br><span class="line">              ┌────────────────┐</span><br><span class="line">              │  ChatServer(s) │  TCP 长连接聊天</span><br><span class="line">              └────────────────┘</span><br><span class="line">                      ▲</span><br><span class="line">                      │ 由 StatusServer 按策略分配</span><br><span class="line">              ┌───────┴────────┐</span><br><span class="line">              │  StatusServer  │  gRPC :50052</span><br><span class="line">              └────────────────┘</span><br></pre></td></tr></table></figure>
+
 <p><strong>记忆口诀：</strong></p>
 <ul>
 <li>客户端<strong>只认识 GateServer</strong>（HTTP）</li>
-<li>GateServer <strong>对外当门面，对内调 gRPC / Redis / MySQL</strong></li>
+<li>GateServer <strong>对外当门面，对内调 gRPC &#x2F; Redis &#x2F; MySQL</strong></li>
 <li>VarifyServer <strong>只管验证码邮件 + 把验证码写 Redis</strong></li>
 <li>StatusServer <strong>只管“这个用户该连哪台聊天服”</strong></li>
 </ul>
 <hr>
 <h2 id="3-各模块职责与技术栈"><a href="#3-各模块职责与技术栈" class="headerlink" title="3. 各模块职责与技术栈"></a>3. 各模块职责与技术栈</h2><h3 id="3-1-Qt-客户端-chat"><a href="#3-1-Qt-客户端-chat" class="headerlink" title="3.1 Qt 客户端 chat/"></a>3.1 Qt 客户端 <code>chat/</code></h3><p><strong>职责：</strong> 用户界面与请求发起（登录、注册、重置密码）。</p>
 <p><strong>主要技术：</strong></p>
-<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -367,8 +359,7 @@
 <th>用途</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>Qt Widgets</td>
 <td>窗口、输入框、按钮、<code>QStackedWidget</code> 翻页</td>
 </tr>
@@ -377,8 +368,8 @@
 <td>发 HTTP POST</td>
 </tr>
 <tr>
-<td>QJsonObject / QJsonDocument</td>
-<td>组装/解析 JSON</td>
+<td>QJsonObject &#x2F; QJsonDocument</td>
+<td>组装&#x2F;解析 JSON</td>
 </tr>
 <tr>
 <td>QTimer</td>
@@ -386,15 +377,13 @@
 </tr>
 <tr>
 <td>信号槽</td>
-<td><code>HttpMgr</code> 回包分发给登录/注册模块</td>
+<td><code>HttpMgr</code> 回包分发给登录&#x2F;注册模块</td>
 </tr>
 <tr>
 <td><code>xorString</code></td>
 <td>密码异或“简单加密”后再上传</td>
 </tr>
-</tbody>
-</table>
-</div>
+</tbody></table>
 <p><strong>关键文件：</strong></p>
 <ul>
 <li><code>httpmgr.cpp</code>：统一发 HTTP，按 <code>Modules</code> 转发回包</li>
@@ -406,11 +395,11 @@
 </ul>
 <p><strong>客户端配置示例：</strong></p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[GateServer]</span></span><br><span class="line"><span class="attr">host</span>=localhost</span><br><span class="line"><span class="attr">port</span>=<span class="number">8080</span></span><br></pre></td></tr></table></figure>
+
 <p>启动后拼出：<code>http://localhost:8080</code></p>
 <hr>
 <h3 id="3-2-GateServer（HTTP-网关）"><a href="#3-2-GateServer（HTTP-网关）" class="headerlink" title="3.2 GateServer（HTTP 网关）"></a>3.2 GateServer（HTTP 网关）</h3><p><strong>职责：</strong> 对外提供 REST 风格 HTTP 接口；对内编排验证码、注册、登录、重置密码。</p>
 <p><strong>主要技术：</strong></p>
-<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -418,8 +407,7 @@
 <th>用途</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>Boost.Asio</td>
 <td>异步 IO、线程池 <code>AsioIOServicePool</code></td>
 </tr>
@@ -429,7 +417,7 @@
 </tr>
 <tr>
 <td>JsonCpp</td>
-<td>解析请求体 / 构造响应</td>
+<td>解析请求体 &#x2F; 构造响应</td>
 </tr>
 <tr>
 <td>gRPC C++</td>
@@ -440,22 +428,19 @@
 <td>RPC 消息定义（<code>message.proto</code>）</td>
 </tr>
 <tr>
-<td>libmysql / 连接池</td>
+<td>libmysql &#x2F; 连接池</td>
 <td>读写用户表</td>
 </tr>
 <tr>
-<td>hiredis / Redis 连接池</td>
+<td>hiredis &#x2F; Redis 连接池</td>
 <td>读验证码 <code>code_&lt;email&gt;</code></td>
 </tr>
 <tr>
 <td>单例 (<code>Singleton</code>)</td>
 <td><code>LogicSystem</code>、<code>RedisMgr</code>、<code>MysqlMgr</code> 等</td>
 </tr>
-</tbody>
-</table>
-</div>
+</tbody></table>
 <p><strong>对外 HTTP 接口（见 <code>LogicSystem.cpp</code>）：</strong></p>
-<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -464,8 +449,7 @@
 <th>作用</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td><code>/get_varifycode</code></td>
 <td>POST</td>
 <td>向 VarifyServer 要验证码并发邮件</td>
@@ -485,15 +469,13 @@
 <td>POST</td>
 <td>按邮箱验密，再向 StatusServer 要聊天服</td>
 </tr>
-</tbody>
-</table>
-</div>
+</tbody></table>
 <p><strong>配置 <code>GateServer/config.ini</code>：</strong></p>
 <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[GateServer]</span></span><br><span class="line"><span class="attr">Port</span> = <span class="number">8080</span></span><br><span class="line"><span class="section">[VarifyServer]</span></span><br><span class="line"><span class="attr">Host</span> = <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"><span class="attr">Port</span> = <span class="number">50051</span></span><br><span class="line"><span class="section">[StatusServer]</span></span><br><span class="line"><span class="attr">Host</span> = <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"><span class="attr">Port</span> = <span class="number">50052</span></span><br><span class="line"><span class="section">[Mysql]</span></span><br><span class="line">...</span><br><span class="line"><span class="section">[Redis]</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
 <hr>
 <h3 id="3-3-VarifyServer（验证码服务）"><a href="#3-3-VarifyServer（验证码服务）" class="headerlink" title="3.3 VarifyServer（验证码服务）"></a>3.3 VarifyServer（验证码服务）</h3><p><strong>职责：</strong> 收到 gRPC 请求后生成验证码、写入 Redis、发邮件。</p>
 <p><strong>主要技术：</strong></p>
-<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -501,8 +483,7 @@
 <th>用途</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>Node.js</td>
 <td>服务运行时</td>
 </tr>
@@ -522,23 +503,21 @@
 <td><code>nodemailer</code></td>
 <td>SMTP 发邮件</td>
 </tr>
-</tbody>
-</table>
-</div>
+</tbody></table>
 <p><strong>关键文件：</strong></p>
 <ul>
 <li><code>server.js</code>：实现 <code>GetVarifyCode</code></li>
 <li><code>email.js</code>：发信</li>
-<li><code>redis.js</code>：<code>GetRedis</code> / <code>SetRedisExpire</code></li>
+<li><code>redis.js</code>：<code>GetRedis</code> &#x2F; <code>SetRedisExpire</code></li>
 <li><code>config.json</code>：邮箱账号、Redis 地址</li>
 </ul>
 <p><strong>Redis Key 约定：</strong></p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">code_&lt;邮箱&gt;  =  验证码字符串</span><br><span class="line">过期时间约 600 秒（10 分钟）</span><br></pre></td></tr></table></figure>
-<p>GateServer 注册/重置时用同一前缀 <code>CODEPREFIX = &quot;code_&quot;</code> 去读，所以两边必须连<strong>同一套 Redis</strong>。</p>
+
+<p>GateServer 注册&#x2F;重置时用同一前缀 <code>CODEPREFIX = &quot;code_&quot;</code> 去读，所以两边必须连<strong>同一套 Redis</strong>。</p>
 <hr>
-<h3 id="3-4-StatusServer（状态-分配服务）"><a href="#3-4-StatusServer（状态-分配服务）" class="headerlink" title="3.4 StatusServer（状态 / 分配服务）"></a>3.4 StatusServer（状态 / 分配服务）</h3><p><strong>职责：</strong> 登录成功后，为用户分配一台 ChatServer，并生成 token。</p>
+<h3 id="3-4-StatusServer（状态-分配服务）"><a href="#3-4-StatusServer（状态-分配服务）" class="headerlink" title="3.4 StatusServer（状态 &#x2F; 分配服务）"></a>3.4 StatusServer（状态 &#x2F; 分配服务）</h3><p><strong>职责：</strong> 登录成功后，为用户分配一台 ChatServer，并生成 token。</p>
 <p><strong>主要技术：</strong></p>
-<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -546,14 +525,13 @@
 <th>用途</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>gRPC C++</td>
 <td>提供 <code>StatusService.GetChatServer</code></td>
 </tr>
 <tr>
 <td>Protobuf</td>
-<td>请求 uid，返回 host/port/token</td>
+<td>请求 uid，返回 host&#x2F;port&#x2F;token</td>
 </tr>
 <tr>
 <td>Boost.UUID</td>
@@ -567,15 +545,14 @@
 <td>ConfigMgr</td>
 <td>读取多台 chatserver 配置</td>
 </tr>
-</tbody>
-</table>
-</div>
+</tbody></table>
 <p><strong>接口语义：</strong></p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GetChatServer(uid) → &#123; host, port, token, error &#125;</span><br></pre></td></tr></table></figure>
+
 <p>GateServer 登录成功后调用它，再把结果返回给 Qt 客户端。</p>
 <hr>
 <h3 id="3-5-MySQL"><a href="#3-5-MySQL" class="headerlink" title="3.5 MySQL"></a>3.5 MySQL</h3><p><strong>职责：</strong> 持久化用户账号。</p>
-<p>典型字段（以 <code>user</code> 表 / <code>reg_user</code> 存储过程为准）：</p>
+<p>典型字段（以 <code>user</code> 表 &#x2F; <code>reg_user</code> 存储过程为准）：</p>
 <ul>
 <li><code>uid</code></li>
 <li><code>name</code>（用户名）</li>
@@ -593,14 +570,15 @@
 <p>本项目中最关键的用途：</p>
 <ol>
 <li>VarifyServer 写入 <code>code_邮箱</code></li>
-<li>GateServer 注册/重置时读取并比对</li>
+<li>GateServer 注册&#x2F;重置时读取并比对</li>
 </ol>
 <p>其他用途（StatusServer）：登录计数、token 缓存等（代码中有相关设计）。</p>
 <hr>
 <h2 id="4-核心业务流程（对照源码学习）"><a href="#4-核心业务流程（对照源码学习）" class="headerlink" title="4. 核心业务流程（对照源码学习）"></a>4. 核心业务流程（对照源码学习）</h2><h3 id="4-1-获取验证码"><a href="#4-1-获取验证码" class="headerlink" title="4.1 获取验证码"></a>4.1 获取验证码</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Qt 填邮箱</span><br><span class="line">  → POST /get_varifycode &#123; email &#125;</span><br><span class="line">  → GateServer</span><br><span class="line">  → gRPC GetVarifyCode</span><br><span class="line">  → VarifyServer：生成码 → Redis SET → 发邮件</span><br><span class="line">  → 回包 error=0</span><br><span class="line">  → Qt 提示“已发送”，按钮 60s 倒计时</span><br></pre></td></tr></table></figure>
+
 <h3 id="4-2-注册"><a href="#4-2-注册" class="headerlink" title="4.2 注册"></a>4.2 注册</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Qt 提交 &#123; user, email, passwd(xor), confirm(xor), varifycode &#125;</span><br><span class="line">  → POST /user_register</span><br><span class="line">  → GateServer：</span><br><span class="line">       1) Redis GET code_email，比对验证码</span><br><span class="line">       2) MySQL CALL reg_user</span><br><span class="line">  → 成功返回 uid</span><br><span class="line">  → Qt 切到 page_2，5 秒后回登录页</span><br></pre></td></tr></table></figure>
+
 <p>存储过程常见返回值含义（结合你之前日志）：</p>
-<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -608,8 +586,7 @@
 <th>含义（常见约定）</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>&gt;0</td>
 <td>成功，值为 uid</td>
 </tr>
@@ -619,21 +596,20 @@
 </tr>
 <tr>
 <td>-1</td>
-<td>异常 / 失败</td>
+<td>异常 &#x2F; 失败</td>
 </tr>
-</tbody>
-</table>
-</div>
+</tbody></table>
 <h3 id="4-3-登录"><a href="#4-3-登录" class="headerlink" title="4.3 登录"></a>4.3 登录</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Qt 提交 &#123; email, passwd(xor) &#125;</span><br><span class="line">  → POST /user_login</span><br><span class="line">  → GateServer：</span><br><span class="line">       1) MySQL 按 email 查用户并比对 pwd</span><br><span class="line">       2) gRPC StatusServer.GetChatServer(uid)</span><br><span class="line">  → 返回 &#123; uid, token, host, ... &#125;</span><br><span class="line">  → Qt 后续可用这些信息去连 ChatServer</span><br></pre></td></tr></table></figure>
+
 <p>注意：</p>
 <ul>
 <li>密码在注册和登录时都应经过 <code>xorString</code>，库里存的是异或后的串。</li>
 <li>登录按<strong>邮箱</strong>查库（与客户端表单一致）。</li>
 </ul>
 <h3 id="4-4-重置密码"><a href="#4-4-重置密码" class="headerlink" title="4.4 重置密码"></a>4.4 重置密码</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Qt 提交邮箱 + 验证码 + 新密码(xor)</span><br><span class="line">  → POST /reset_pwd</span><br><span class="line">  → GateServer 校验 Redis 验证码 → UpdatePwd</span><br></pre></td></tr></table></figure>
+
 <hr>
-<h2 id="5-通信协议对照表"><a href="#5-通信协议对照表" class="headerlink" title="5. 通信协议对照表"></a>5. 通信协议对照表</h2><div class="table-container">
-<table>
+<h2 id="5-通信协议对照表"><a href="#5-通信协议对照表" class="headerlink" title="5. 通信协议对照表"></a>5. 通信协议对照表</h2><table>
 <thead>
 <tr>
 <th>谁 → 谁</th>
@@ -642,8 +618,7 @@
 <th>典型端口</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>Qt → GateServer</td>
 <td>HTTP</td>
 <td>JSON</td>
@@ -662,7 +637,7 @@
 <td>50052</td>
 </tr>
 <tr>
-<td>VarifyServer / GateServer → Redis</td>
+<td>VarifyServer &#x2F; GateServer → Redis</td>
 <td>Redis 协议</td>
 <td>字符串 KV</td>
 <td>6380</td>
@@ -670,19 +645,18 @@
 <tr>
 <td>GateServer → MySQL</td>
 <td>MySQL 协议</td>
-<td>SQL / 存储过程</td>
+<td>SQL &#x2F; 存储过程</td>
 <td>3307（你的环境）</td>
 </tr>
 <tr>
 <td>Qt → ChatServer（后续）</td>
 <td>TCP（自定义包）</td>
 <td>业务协议</td>
-<td>8990/8991</td>
+<td>8990&#x2F;8991</td>
 </tr>
-</tbody>
-</table>
-</div>
+</tbody></table>
 <h3 id="Protobuf-服务一览（message-proto）"><a href="#Protobuf-服务一览（message-proto）" class="headerlink" title="Protobuf 服务一览（message.proto）"></a>Protobuf 服务一览（<code>message.proto</code>）</h3><figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">service </span><span class="title class_">VarifyService</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">rpc</span> GetVarifyCode (GetVarifyReq) <span class="keyword">returns</span> (GetVarifyRsp)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">service </span><span class="title class_">StatusService</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">rpc</span> GetChatServer (GetChatServerReq) <span class="keyword">returns</span> (GetChatServerRsp)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <hr>
 <h2 id="6-启动顺序建议"><a href="#6-启动顺序建议" class="headerlink" title="6. 启动顺序建议"></a>6. 启动顺序建议</h2><p>本地联调时建议按依赖从下往上启动：</p>
 <ol>
@@ -694,7 +668,6 @@
 <li><strong>Qt 客户端</strong></li>
 </ol>
 <p>缺一不可的常见现象：</p>
-<div class="table-container">
 <table>
 <thead>
 <tr>
@@ -702,10 +675,9 @@
 <th>常见原因</th>
 </tr>
 </thead>
-<tbody>
-<tr>
-<td>参数错误 / RPCFailed</td>
-<td>Gate 连不上 Varify/Status，或配置 Host/Port 写错大小写</td>
+<tbody><tr>
+<td>参数错误 &#x2F; RPCFailed</td>
+<td>Gate 连不上 Varify&#x2F;Status，或配置 Host&#x2F;Port 写错大小写</td>
 </tr>
 <tr>
 <td>Redis Connection is closed</td>
@@ -713,39 +685,38 @@
 </tr>
 <tr>
 <td>user or email exist</td>
-<td>邮箱/用户名已注册</td>
+<td>邮箱&#x2F;用户名已注册</td>
 </tr>
 <tr>
 <td>user pwd not match</td>
 <td>曾按用户名查库、或密码未 xor、或邮箱不存在</td>
 </tr>
-</tbody>
-</table>
-</div>
+</tbody></table>
 <hr>
 <h2 id="7-推荐源码阅读顺序"><a href="#7-推荐源码阅读顺序" class="headerlink" title="7. 推荐源码阅读顺序"></a>7. 推荐源码阅读顺序</h2><p>按“从外到内”读，更容易建立全局图：</p>
 <ol>
 <li><code>chat/main.cpp</code> → 读 <code>config.ini</code>，得到 <code>gate_url_prefix</code></li>
 <li><code>chat/httpmgr.cpp</code> → HTTP 怎么发、信号怎么分模块</li>
-<li><code>chat/registerdialog.cpp</code> / <code>logindialog.cpp</code> → 业务请求字段</li>
+<li><code>chat/registerdialog.cpp</code> &#x2F; <code>logindialog.cpp</code> → 业务请求字段</li>
 <li><code>GateServer/CServer.cpp</code> + <code>HttpConnection.cpp</code> → 连接怎么接、HTTP 怎么读</li>
 <li><code>GateServer/LogicSystem.cpp</code> → <strong>最重要的业务编排</strong></li>
-<li><code>GateServer/VarifyGrpcClient.*</code> / <code>StatusGrpcClient.*</code> → 如何调 gRPC</li>
+<li><code>GateServer/VarifyGrpcClient.*</code> &#x2F; <code>StatusGrpcClient.*</code> → 如何调 gRPC</li>
 <li><code>VarifyServer/server.js</code> → 验证码与邮件</li>
 <li><code>StatusServer/StatusServiceImpl.cpp</code> → 如何选 ChatServer、发 token</li>
-<li><code>GateServer/MysqlDao.cpp</code> / <code>RedisMgr.cpp</code> → 持久化与缓存细节</li>
+<li><code>GateServer/MysqlDao.cpp</code> &#x2F; <code>RedisMgr.cpp</code> → 持久化与缓存细节</li>
 </ol>
 <hr>
-<h2 id="8-设计思想小结（面试-自测可用）"><a href="#8-设计思想小结（面试-自测可用）" class="headerlink" title="8. 设计思想小结（面试/自测可用）"></a>8. 设计思想小结（面试/自测可用）</h2><ol>
+<h2 id="8-设计思想小结（面试-自测可用）"><a href="#8-设计思想小结（面试-自测可用）" class="headerlink" title="8. 设计思想小结（面试&#x2F;自测可用）"></a>8. 设计思想小结（面试&#x2F;自测可用）</h2><ol>
 <li><strong>网关模式</strong>：客户端只打一个 HTTP 入口，降低耦合。</li>
 <li><strong>服务拆分</strong>：验证码、状态分配、业务网关职责分离，可独立扩容。</li>
 <li><strong>同步短请求用 HTTP；内部高性能调用用 gRPC</strong>。</li>
 <li><strong>热点短数据放 Redis，长期数据放 MySQL</strong>。</li>
-<li><strong>连接池</strong>：MySQL / Redis / gRPC Stub 池，提升并发。</li>
+<li><strong>连接池</strong>：MySQL &#x2F; Redis &#x2F; gRPC Stub 池，提升并发。</li>
 <li><strong>IO 线程池</strong>：<code>AsioIOServicePool</code> 提高 GateServer 并发处理能力。</li>
 </ol>
 <hr>
 <h2 id="9-本仓库目录速查"><a href="#9-本仓库目录速查" class="headerlink" title="9. 本仓库目录速查"></a>9. 本仓库目录速查</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">chatProject/</span><br><span class="line">├── chat/                 # Qt 客户端</span><br><span class="line">├── GateServer/           # HTTP 网关</span><br><span class="line">├── VarifyServer/         # Node 验证码服务</span><br><span class="line">├── StatusServer/         # gRPC 状态/分配服务</span><br><span class="line">└── PROJECT_LEARNING.md   # 本学习文档</span><br></pre></td></tr></table></figure>
+
 <hr>
 <h2 id="10-练习建议"><a href="#10-练习建议" class="headerlink" title="10. 练习建议"></a>10. 练习建议</h2><p>学完后可用下面问题自测：</p>
 <ol>
@@ -798,10 +769,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2026-09-17 17:00:00 / 修改时间：18:02:49" itemprop="dateCreated datePublished" datetime="2026-09-17T17:00:00+08:00">2026-09-17</time>
+              <time title="创建时间：2026-09-17 17:00:00" itemprop="dateCreated datePublished" datetime="2026-09-17T17:00:00+08:00">2026-09-17</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-09-27 00:28:48" itemprop="dateModified" datetime="2026-09-27T00:28:48+08:00">2026-09-27</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -823,8 +800,515 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="add-kernel"><a href="#add-kernel" class="headerlink" title="add_kernel"></a>add_kernel</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;torch/extension.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CHECK_CUDA(x) TORCH_CHECK(x.device().is_cuda(), #x <span class="string">&quot; must be a CUDA tensor&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CHECK_CONTIGUOUS(x) TORCH_CHECK(x.is_contiguous(), #x <span class="string">&quot; must be contiguous&quot;</span>)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CHECK_INPUT(x)                                                                                                 \</span></span><br><span class="line"><span class="meta">  CHECK_CUDA(x);                                                                                                       \</span></span><br><span class="line"><span class="meta">  CHECK_CONTIGUOUS(x)</span></span><br><span class="line"></span><br><span class="line"><span class="function">__global__ <span class="type">void</span> <span class="title">add_kernel</span><span class="params">(<span class="type">const</span> <span class="type">float</span> *input1, <span class="type">const</span> <span class="type">float</span> *input2, <span class="type">float</span> *output, <span class="type">int</span> size)</span> </span>&#123;</span><br><span class="line">  <span class="type">const</span> <span class="type">int</span> idx = blockIdx.x * blockDim.x + threadIdx.x;</span><br><span class="line">  <span class="keyword">if</span> (idx &lt; size)</span><br><span class="line">    output[idx] = input1[idx] + input2[idx];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">torch::Tensor <span class="title">add</span><span class="params">(torch::Tensor input1, torch::Tensor input2)</span> </span>&#123;</span><br><span class="line">  <span class="built_in">CHECK_INPUT</span>(input1);</span><br><span class="line">  <span class="built_in">CHECK_INPUT</span>(input2);</span><br><span class="line">  <span class="type">int</span> size = input1.<span class="built_in">numel</span>();</span><br><span class="line">  <span class="built_in">TORCH_CHECK</span>(size == input2.<span class="built_in">numel</span>(), <span class="string">&quot;input1 and input2 must have the same size&quot;</span>);</span><br><span class="line">  torch::Tensor output = torch::<span class="built_in">empty</span>(size, input1.<span class="built_in">options</span>());</span><br><span class="line"></span><br><span class="line">  <span class="type">int</span> n_threads = <span class="number">256</span>;</span><br><span class="line">  <span class="type">int</span> n_blocks = (size + n_threads - <span class="number">1</span>) / n_threads;</span><br><span class="line">  add_kernel&lt;&lt;&lt;n_blocks, n_threads&gt;&gt;&gt;(input1.<span class="built_in">data_ptr</span>&lt;<span class="type">float</span>&gt;(), input2.<span class="built_in">data_ptr</span>&lt;<span class="type">float</span>&gt;(), output.<span class="built_in">data_ptr</span>&lt;<span class="type">float</span>&gt;(),</span><br><span class="line">                                      size);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> output;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">PYBIND11_MODULE</span>(TORCH_EXTENSION_NAME, m) &#123; m.<span class="built_in">def</span>(<span class="string">&quot;add&quot;</span>, &amp;add, <span class="string">&quot;Add two vectors&quot;</span>); &#125;</span><br></pre></td></tr></table></figure>
+          <h1 id="CUDA-CONCURRENCY（并发）"><a href="#CUDA-CONCURRENCY（并发）" class="headerlink" title="CUDA CONCURRENCY（并发）"></a>CUDA CONCURRENCY（并发）</h1><h2 id="Pinned-Memory（页锁定内存-不可分页内存）"><a href="#Pinned-Memory（页锁定内存-不可分页内存）" class="headerlink" title="Pinned Memory（页锁定内存&#x2F;不可分页内存）"></a>Pinned Memory（页锁定内存&#x2F;不可分页内存）</h2><h3 id="Pinned-Memory带来的能力："><a href="#Pinned-Memory带来的能力：" class="headerlink" title="Pinned Memory带来的能力："></a>Pinned Memory带来的能力：</h3><ul>
+<li>host和device这几件的数据拷贝速度更快</li>
+<li>内存拷贝可以和 CPU 异步执行（CPU 不用等待拷贝完成）</li>
+<li>内存拷贝可以和 GPU 异步执行</li>
+</ul>
+<h3 id="使用方法："><a href="#使用方法：" class="headerlink" title="使用方法："></a>使用方法：</h3><ul>
+<li><p><code>cudaHostAlloc</code> &#x2F; <code>cudaFreeHost</code>（直接分配页锁定内存 &#x2F; 释放页锁定内存），代替<code>malloc</code> &#x2F; <code>free</code> or <code>new</code> &#x2F; <code>delete</code></p>
+</li>
+<li><p><code>cudaHostRegister</code> &#x2F; <code>cudaHostUnregister</code>（将普通内存注册为页锁定 &#x2F; 解除页锁定），对已经用 malloc 分配好的普通内存，后续再锁定</p>
+</li>
+</ul>
+<h3 id="影响与特性："><a href="#影响与特性：" class="headerlink" title="影响与特性："></a>影响与特性：</h3><ul>
+<li>页锁定内存本质上不再属于主机可分页虚拟内存，操作系统不会把这块内存交换到 swap 磁盘</li>
+</ul>
+<h3 id="pageable-memory（可分页内存）"><a href="#pageable-memory（可分页内存）" class="headerlink" title="pageable memory（可分页内存）"></a>pageable memory（可分页内存）</h3><ul>
+<li><p><strong>物理内存（RAM）</strong>：电脑里的内存条，读写极快，但容量有限。</p>
+</li>
+<li><p><strong>Swap（交换分区）</strong>：硬盘上专门划出的一块区域，速度比内存慢几百倍，用来救急。</p>
+</li>
+<li><p><strong>内存页 page</strong>：操作系统管理内存的最小单位（一般 4KB 一页）。OS 不是按单个字节管理内存，而是一页一页管理。</p>
+</li>
+<li><p>当你用 <code>malloc/new</code> 分配内存，拿到的是<strong>虚拟内存地址</strong>，不是直接的物理内存条地址。OS 维护一张映射表：虚拟地址 ↔ 物理内存页。</p>
+</li>
+</ul>
+<h4 id="虚拟内存机制"><a href="#虚拟内存机制" class="headerlink" title="虚拟内存机制"></a><strong>虚拟内存机制</strong></h4><p>操作系统给进程分配的是<strong>虚拟地址</strong>，不是直接物理内存。<br>OS 可以在内存紧张的时候，把这块内存对应的页面 swap 交换到磁盘交换区；需要的时候再加载回物理内存。<br>这就是「可分页」。</p>
+<h4 id="malloc-new-只是标准-C-C-内存分配接口"><a href="#malloc-new-只是标准-C-C-内存分配接口" class="headerlink" title="malloc/new 只是标准 C&#x2F;C++ 内存分配接口"></a><strong><code>malloc/new</code> 只是标准 C&#x2F;C++ 内存分配接口</strong></h4><p>它们调用操作系统原生内存分配（<code>mmap</code> &#x2F; <code>VirtualAlloc</code>），<strong>不会去调用 CUDA 驱动做页锁定</strong>，所以分配出来的内存页面默认是可以被 swap 换出的。</p>
+<h4 id="Swap-out（页面换出）"><a href="#Swap-out（页面换出）" class="headerlink" title="Swap out（页面换出）"></a>Swap out（页面换出）</h4><h5 id="内存紧张时，发生-Swap-out（页面换出）"><a href="#内存紧张时，发生-Swap-out（页面换出）" class="headerlink" title="内存紧张时，发生 Swap out（页面换出）"></a>内存紧张时，发生 Swap out（页面换出）</h5><ul>
+<li>场景：你的程序、浏览器、CUDA 程序一起跑，所有程序需要的内存总和 &gt; 物理内存条大小。<br>操作系统会做一件事：</li>
+</ul>
+<ol>
+<li>挑一块暂时不用的内存页面（比如你 malloc 出来的一块数组）；</li>
+<li>把这一页里的数据，写入硬盘的 Swap 分区保存；</li>
+<li>释放这块物理内存条空间，给别的正在运行的程序使用；</li>
+<li>虚拟地址仍然保留，但对应的物理内存现在是空的，数据在硬盘里。</li>
+</ol>
+<h5 id="程序再次访问这块内存：Swap-in（页面换入）"><a href="#程序再次访问这块内存：Swap-in（页面换入）" class="headerlink" title="程序再次访问这块内存：Swap in（页面换入）"></a>程序再次访问这块内存：Swap in（页面换入）</h5><p>当你的代码再次读取这个 malloc 数组时：</p>
+<ol>
+<li>CPU 发现：这个虚拟页不在物理内存；</li>
+<li>OS 触发缺页中断；</li>
+<li>从硬盘 Swap 分区，把这一页数据重新读回到物理内存条；</li>
+<li>程序才可以正常读取数据。</li>
+</ol>
+<blockquote>
+<p>硬盘速度很慢，频繁 swap 会造成系统卡顿。</p>
+</blockquote>
+<h5 id="为什么这件事会影响-CUDA-传输？"><a href="#为什么这件事会影响-CUDA-传输？" class="headerlink" title="为什么这件事会影响 CUDA 传输？"></a>为什么这件事会影响 CUDA 传输？</h5><p>GPU 的 DMA 直接访问<strong>物理内存</strong>，它看不懂虚拟地址，<strong>不能等待操作系统从硬盘把页面读回来</strong>。</p>
+<ul>
+<li>如果是普通 pageable 内存：传输中途，页面可能被换到硬盘。GPU DMA 直接读就会失败。</li>
+<li>所以 CUDA 在<code>cudaMemcpy</code>时，只能额外开辟一份临时 pinned 主机缓冲区：先 CPU 拷贝到不会被 swap 的缓冲区，再传给 GPU。</li>
+<li><strong>Pinned 内存</strong>：告诉操作系统：<strong>这一页绝对不许换去 Swap，必须永久留在物理内存条中</strong>。OS 不能把它换出硬盘。所以 GPU DMA 可以直接访问，支持异步拷贝。</li>
+</ul>
+<h5 id="DMA-Direct-Memory-Access，直接内存访问"><a href="#DMA-Direct-Memory-Access，直接内存访问" class="headerlink" title="DMA(Direct Memory Access，直接内存访问)"></a>DMA(Direct Memory Access，直接内存访问)</h5><p>GPU 的 DMA 传输，<strong>只能直接读物理内存条里的数据</strong>，不能直接读硬盘。</p>
+<h6 id="1-没有-DMA（CPU-搬运）"><a href="#1-没有-DMA（CPU-搬运）" class="headerlink" title="1. 没有 DMA（CPU 搬运）"></a>1. 没有 DMA（CPU 搬运）</h6><p>假设要把主机内存的数据传给 GPU：</p>
+<ol>
+<li>CPU 读内存里的数据</li>
+<li>CPU 把数据一点点送到 PCIe 总线</li>
+<li>写到 GPU 显存<br>👉 CPU 全程被占用，只能干搬运这件事，没法同时做别的计算。</li>
+</ol>
+<h6 id="2-有-DMA（硬件搬运）"><a href="#2-有-DMA（硬件搬运）" class="headerlink" title="2. 有 DMA（硬件搬运）"></a>2. 有 DMA（硬件搬运）</h6><p>DMA 控制器是一个独立硬件。流程变成：</p>
+<ol>
+<li>CPU 只需要下达一条指令：<strong>把 A 地址的数据搬到 B 地址</strong></li>
+<li><strong>剩下的数据搬运工作由 DMA 硬件独立完成</strong>，CPU 解放出来，可以去跑别的代码</li>
+<li>搬运结束后，DMA 发中断通知 CPU：传输完成了</li>
+</ol>
+<blockquote>
+<p>核心：<strong>数据不经过 CPU 寄存器中转，内存 ↔ 外设直接传输</strong>。<br>GPU、网卡、硬盘控制器都带有 DMA。在 CUDA 里，就是 GPU 通过 PCIe 上的 DMA，完成主机内存 ↔ GPU 显存的数据传输。</p>
+</blockquote>
+<h2 id="CUDA-STREAMS-cuda流"><a href="#CUDA-STREAMS-cuda流" class="headerlink" title="CUDA STREAMS(cuda流)"></a>CUDA STREAMS(cuda流)</h2><h3 id="默认API"><a href="#默认API" class="headerlink" title="默认API"></a>默认API</h3><ul>
+<li>Kernel launches相对于 CPU 是异步的(CPU 调用<code>kernel&lt;&lt;&lt;&gt;&gt;&gt;</code>提交内核后，<strong>不会阻塞</strong>，CPU 线程直接继续往下跑，不用等 GPU 内核跑完。)</li>
+<li>普通<code>cudaMemcpy</code>（设备→主机、主机→设备）<strong>阻塞 CPU 线程</strong>(CPU 调用这个函数后，原地等待，直到整个内存拷贝全部完成，代码才继续往下执行)</li>
+<li>驱动会串行执行 CUDA 调用（传统默认流），所有任务都放到同一个默认流里，任务<strong>排队串行执行</strong>：前一个任务做完，才跑下一个。默认流无法实现拷贝和计算重叠。</li>
+</ul>
+<h3 id="流和异步API"><a href="#流和异步API" class="headerlink" title="流和异步API"></a>流和异步API</h3><ul>
+<li><p><code>cudaMemcpyAsync</code>(D2H, H2D)异步拷贝，不会阻塞 CPU：CPU 提交拷贝任务之后，函数立刻返回，CPU 继续跑自己的代码，<strong>不用等传输结束</strong>。✅ 使用前提：主机内存必须是 <strong>Pinned 页锁定内存</strong>。</p>
+</li>
+<li><p>可以让内核计算 + 内存拷贝<strong>并发执行</strong>（Copy-Compute Overlap，<strong>拷贝计算重叠</strong>）</p>
+</li>
+<li><p>大多数 GPU 支持<strong>双向同时传输</strong>：H2D（主机→GPU）和 D2H（GPU→主机）可以并行跑。</p>
+</li>
+</ul>
+<h3 id="Stream-的定义"><a href="#Stream-的定义" class="headerlink" title="Stream 的定义"></a>Stream 的定义</h3><ul>
+<li><p>CUDA 流 &#x3D; 在 GPU 上<strong>严格按提交顺序执行的一系列操作</strong>，同一个流内部：任务<strong>必须串行</strong>，按你提交的顺序依次执行，不能乱序。</p>
+</li>
+<li><p>不同流的操作，可以交错执行(流 A 的任务 和 流 B 的任务，GPU 可以交替执行)</p>
+</li>
+<li><p>来自<strong>不同流</strong>的内核计算和内存拷贝，可以并行重叠执行</p>
+</li>
+</ul>
+<h3 id="SM（Streaming-Multiprocessor）"><a href="#SM（Streaming-Multiprocessor）" class="headerlink" title="SM（Streaming Multiprocessor）"></a>SM（Streaming Multiprocessor）</h3><ul>
+<li>流式多处理器</li>
+</ul>
+<h3 id="CUDA-流的核心规则"><a href="#CUDA-流的核心规则" class="headerlink" title="CUDA 流的核心规则"></a>CUDA 流的核心规则</h3><ul>
+<li><p>同一条流里提交的 2 个操作：严格按提交顺序串行执行（同流串行）</p>
+</li>
+<li><p>不同流提交的操作：CUDA 不规定任何顺序，无默认依赖</p>
+</li>
+<li><p>Operation（操作）定义：</p>
+<ul>
+<li><code>cudaMemcpyAsync</code> 异步内存拷贝；</li>
+<li>Kernel 内核调用（<code>kernel&lt;&lt;&lt;grid,block,0,stream&gt;&gt;&gt;</code>）<br><strong>所有带 stream 参数的 CUDA API，还有流回调函数，都算作流操作</strong>。</li>
+</ul>
+</li>
+</ul>
+<h4 id="提醒"><a href="#提醒" class="headerlink" title="提醒"></a>提醒</h4><ul>
+<li>不带 stream 参数的 API（<code>cudaMemcpy</code>、<code>cudaMalloc</code>等）不属于自定义流操作，大多走默认流，容易带来隐式同步，破坏并发。</li>
+<li>stream 参数只是<strong>提交任务时标记归属哪条流</strong>；<strong>不是等待流完成</strong>。提交之后 CPU 立刻继续跑，是异步。</li>
+<li>想要等待流全部任务结束，调用：<code>cudaStreamSynchronize(stream)</code>。</li>
+</ul>
+<h3 id="流创建与拷贝-计算重叠"><a href="#流创建与拷贝-计算重叠" class="headerlink" title="流创建与拷贝&#x2F;计算重叠"></a>流创建与拷贝&#x2F;计算重叠</h3><h4 id="实现拷贝计算重叠的必要条件"><a href="#实现拷贝计算重叠的必要条件" class="headerlink" title="实现拷贝计算重叠的必要条件"></a>实现拷贝计算重叠的必要条件</h4><ul>
+<li><p>主机 ↔ GPU 的异步拷贝，<strong>主机侧内存必须是 Pinned 页锁定内存</strong></p>
+</li>
+<li><p>Kernel内核和memcopy，放到<strong>不同的、非 0 的自定义流</strong></p>
+</li>
+<li><p><strong>是可能重叠，不是一定重叠，根据资源情况定</strong></p>
+</li>
+</ul>
+<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">cudaStream_t stream1, stream2;  <span class="comment">//流句柄变量</span></span><br><span class="line"><span class="built_in">cudaStreamCreate</span>(&amp;stream1);   <span class="comment">// 创建流1</span></span><br><span class="line"><span class="built_in">cudaStreamCreate</span>(&amp;stream2);   <span class="comment">// 创建流2</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cudaMemcpyAsync</span>( dst, src, size, dir, stream1 );  <span class="comment">//异步拷贝，交给stream1</span></span><br><span class="line">kernel&lt;&lt;&lt;grid, block, <span class="number">0</span>, stream2&gt;&gt;&gt;(...);        <span class="comment">//kernel交给stream2</span></span><br><span class="line"><span class="comment">// potentially overlapped 这两个任务有可能并行重叠执行</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cudaStreamQuery</span>(stream1); <span class="comment">// test if stream is idle,非阻塞查询查询 stream1 里所有任务是否全部完成。</span></span><br><span class="line"><span class="built_in">cudaStreamSynchronize</span>(stream2); <span class="comment">// force CPU thread to wait,阻塞同步,CPU 线程停在这里，一直等到 stream2 里面所有任务全部执行完，函数才返回。</span></span><br><span class="line"><span class="built_in">cudaStreamDestroy</span>(stream2); <span class="comment">// 销毁流对象，释放 CUDA 驱动资源</span></span><br></pre></td></tr></table></figure>
 
+<h4 id="向量计算的流行为示例"><a href="#向量计算的流行为示例" class="headerlink" title="向量计算的流行为示例"></a>向量计算的流行为示例</h4><ul>
+<li>前提:算法<strong>可以拆分成多块独立数据</strong>（每一块数据互不依赖，才能流水线并行）</li>
+</ul>
+<h5 id="non-streamed"><a href="#non-streamed" class="headerlink" title="non-streamed"></a>non-streamed</h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaMemcpy</span>(d_x, h_x, size_x, cudaMemcpyHostToDevice);</span><br><span class="line">Kernel&lt;&lt;&lt;b, t&gt;&gt;&gt;(d_x, d_y, N);</span><br><span class="line"><span class="built_in">cudaMemcpy</span>(h_y, d_y, size_y, cudaMemcpyDeviceToHost);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>拷贝和计算<strong>完全不能重叠</strong>，总耗时 &#x3D; H2D 时间 + kernel 时间 + D2H 时间。</li>
+</ul>
+<h5 id="streamed"><a href="#streamed" class="headerlink" title="streamed"></a>streamed</h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; c; i++)&#123;</span><br><span class="line">    <span class="comment">// 计算当前块的偏移offset</span></span><br><span class="line">    <span class="type">size_t</span> offx = (size_x/c)*i;</span><br><span class="line">    <span class="type">size_t</span> offy = (size_y/c)*i;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 1. 异步上传第i块：H2D，放到stream[i%ns]</span></span><br><span class="line">    <span class="built_in">cudaMemcpyAsync</span>(d_x+offx, h_x+offx, size_x/c, cudaMemcpyHostToDevice, stream[i%ns]);</span><br><span class="line">    <span class="comment">// 2. 计算第i块kernel，同一个流</span></span><br><span class="line">    Kernel&lt;&lt;&lt;b/c, t, <span class="number">0</span>, stream[i%ns]&gt;&gt;&gt;(d_x+offx, d_y+offy, N/c);</span><br><span class="line">    <span class="comment">// 3. 异步下载第i块结果：D2H，同一个流</span></span><br><span class="line">    <span class="built_in">cudaMemcpyAsync</span>(h_y+offy, d_y+offy, size_y/c, cudaMemcpyDeviceToHost, stream[i%ns]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>思路：把大向量切分成 c 个小块 chunk，循环处理每一小块</li>
+</ul>
+<h5 id="Warp（线程束）"><a href="#Warp（线程束）" class="headerlink" title="Warp（线程束）"></a>Warp（线程束）</h5><ul>
+<li>Warp 是 NVIDIA GPU 硬件上 SM 内部最小调度执行单位，1 个 warp 固定包含 32 个线程，编号 0~31，叫 lane(通道)，采用 SIMT（单指令多线程）模型执行。</li>
+<li>Block 会被切分成多个 warp，warp 不会跨 Block！Block 的边界可以落在 warp 中间。</li>
+</ul>
+<h5 id="SIMT-单指令多线程"><a href="#SIMT-单指令多线程" class="headerlink" title="SIMT 单指令多线程"></a>SIMT 单指令多线程</h5><p>同一个 warp 里 32 个线程<strong>同一时刻执行同一条指令</strong>，但<strong>每个线程拥有自己独立寄存器、独立 PC 程序计数器、私有数据</strong>。</p>
+<ul>
+<li>SIMD：向量硬件，所有线程共用 PC；</li>
+<li>SIMT：允许 warp 内线程独立分支，硬件通过掩码 mask 关掉不走该分支的线程。</li>
+</ul>
+<h5 id="Warp-调度与延迟隐藏"><a href="#Warp-调度与延迟隐藏" class="headerlink" title="Warp 调度与延迟隐藏"></a>Warp 调度与延迟隐藏</h5><p>SM 里有 warp 调度器（warp scheduler），管理一批就绪 warp：</p>
+<ul>
+<li>如果某个 warp<strong>停顿</strong>：比如访问 Global Memory、发生 Unified Memory 缺页、等待内存，<strong>只有这个 warp 暂停</strong>；</li>
+<li>SM 立刻切换去执行其他就绪 warp；</li>
+<li><strong>warp 切换是零硬件开销</strong>，GPU 靠大量 warp 并行，把内存访问延迟隐藏掉。</li>
+</ul>
+<h5 id="Warp-Divergence-分支发散"><a href="#Warp-Divergence-分支发散" class="headerlink" title="Warp Divergence 分支发散"></a>Warp Divergence 分支发散</h5><p>同一个 warp 内部，线程走不同 if&#x2F;else 分支，就叫 warp divergence。</p>
+<ul>
+<li>GPU 会<strong>串行依次执行每一条分支</strong>；不走这条分支的线程被 mask 屏蔽，不做计算；</li>
+<li>并行度下降，性能变差；</li>
+</ul>
+<blockquote>
+<p>例子：warp 中偶数 thread 进 if，奇数 thread 进 else。GPU 先跑 if（奇数 mask 关闭），再跑 else（偶数 mask 关闭），原本 1 次并行变成 2 次。<br>⚠️ 注意：<strong>不同 warp 之间分支互不影响，不会发散</strong>，发散只发生在同一个 warp 内部。</p>
+</blockquote>
+<h5 id="Occupancy（占用率）"><a href="#Occupancy（占用率）" class="headerlink" title="Occupancy（占用率）"></a>Occupancy（占用率）</h5><ul>
+<li><p>Occupancy（SM 占用率） &#x3D;当前 SM 上驻留的活跃 warp 数量 &#x2F; SM 硬件最大可支持 warp 总数</p>
+</li>
+<li><p>每个线程寄存器越多 → SM 能容纳的总线程 &#x2F;warp 越少 → occupancy 下降</p>
+</li>
+<li><p>SM 寄存器堆是共享资源；单线程寄存器越多，SM 上能放的总 warp 越少，<strong>occupancy 降低</strong>。</p>
+</li>
+</ul>
+<h5 id="Register-寄存器"><a href="#Register-寄存器" class="headerlink" title="Register 寄存器"></a>Register 寄存器</h5><ul>
+<li>单个线程私有，位于SM片上,每个线程可以有多个寄存器，不是一个线程只有一个寄存器</li>
+<li>寄存器溢出：如果编译器发现需要的寄存器 &gt; 当前可用硬件寄存器：<ul>
+<li><strong>溢出（spill）</strong>：把一部分变量压到 Local Memory（属于 Global Memory 的一部分）。</li>
+<li>性能严重下降</li>
+</ul>
+</li>
+<li>现代 GPU 硬件上限：<strong>每个线程最多 255 个 32bit 寄存器</strong>，由编译器自动分配</li>
+</ul>
+<h5 id="shared-memory-共享内存"><a href="#shared-memory-共享内存" class="headerlink" title="shared memory(共享内存)"></a>shared memory(共享内存)</h5><p>SM私有，block内共享</p>
+<ul>
+<li><strong>每个 SM，硬件上只有 1 片统一的片上 SRAM 内存池（Shared Memory &#x2F; L1 统一缓存），不是多个独立 shared memory 硬件模块。<strong>这块内存池，会</strong>动态切分</strong>，分配给当前驻留在这个 SM 上的多个线程块（block）使用。</li>
+</ul>
+<h5 id="L1-Cache"><a href="#L1-Cache" class="headerlink" title="L1 Cache"></a>L1 Cache</h5><ul>
+<li><p>L1 Cache 在<strong>每个 SM 内部（片上 on-chip）</strong>，每个 SM 独立拥有自己的 L1&#x2F;Shared 存储池；不同 SM 之间 L1 不互通。</p>
+</li>
+<li><p>每个 SM 拥有一块统一片上 SRAM，资源可以在 Shared Memory 和 L1 Cache 之间调配；分配给 Shared 的部分不能用作 L1，反之亦然。Shared Memory 由程序员控制，L1 Cache 是硬件自动缓存。</p>
+</li>
+</ul>
+<h5 id="Global-Memory-全局显存"><a href="#Global-Memory-全局显存" class="headerlink" title="Global Memory 全局显存"></a>Global Memory 全局显存</h5><ul>
+<li>所有线程都能访问，位于板载显存</li>
+</ul>
+<h5 id="L2-Cache"><a href="#L2-Cache" class="headerlink" title="L2 Cache"></a>L2 Cache</h5><ul>
+<li>L2 Cache 是 GPU 芯片上，被所有 SM 统一共享的片上缓存，不属于某个单独 SM；不能当作 Shared Memory 使用。</li>
+<li>L2 在 L1 Cache 和 Global Memory（显存）之间，起到全局数据缓存、合并内存请求的作用。</li>
+<li>完全硬件管理，不可切分</li>
+</ul>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><ol>
+<li>Register 寄存器：单线程私有，最快，容量极小</li>
+<li>Shared Memory：SM 片上，block 私有，程序员控制；与 L1 共用 SRAM 池</li>
+<li>L1 Cache：SM 片上，硬件自动缓存</li>
+<li>L2 Cache：全 GPU 共享片上缓存</li>
+<li>Global Memory（显存）：板载 DRAM，容量最大，速度最慢</li>
+</ol>
+<h3 id="DEFAULT-STREAM-默认流"><a href="#DEFAULT-STREAM-默认流" class="headerlink" title="DEFAULT STREAM 默认流"></a>DEFAULT STREAM 默认流</h3><ul>
+<li><p>不指定 stream、或者 stream 参数写 0，就是使用默认流（legacy 默认流）；它是特殊流，会和所有其他自定义流之间产生隐式全局同步，非常容易破坏多流并行！</p>
+</li>
+<li><p>什么时候使用默认流：</p>
+<ul>
+<li>kernel 不写<code>&lt;&lt;&lt;grid,block&gt;&gt;&gt;</code>第 4 个流参数，等价于<code>stream=0</code></li>
+<li><code>cudaMemcpy()</code>（不带 stream 的阻塞拷贝函数）底层就是提交到默认流</li>
+<li><code>cudaMemcpyAsync(..., 0)</code>，指定 stream&#x3D;0，同样是默认流</li>
+</ul>
+</li>
+<li><p>传统默认流行为：</p>
+<ul>
+<li><strong>默认流里面任务开始前：之前所有已经提交到 GPU 的任务（所有自定义流 stream1、stream2）必须全部执行完成，默认流任务才能启动。</strong></li>
+<li><strong>默认流任务执行期间，后面提交给其他流的任务，必须等待默认流任务执行完，才能开始运行。</strong></li>
+</ul>
+</li>
+<li><p>修改默认流行为：per-thread 默认流</p>
+<p>编译选项：<br><code>nvcc --default-stream per-thread </code></p>
+<p>开启后：</p>
+<ul>
+<li>默认流不再是全局同步的特殊流，变成<strong>普通的常规流</strong></li>
+<li>Each host thread will get its own “ordinary” default stream<br><strong>每个 CPU 主机线程拥有独立的默认流</strong>，流之间不再有全局隐式同步，可以正常并行。</li>
+</ul>
+<p>-用<code>nvcc --default-stream per-thread</code>可以把默认流变成普通流，每个 host 线程独立默认流，消除全局隐式同步。</p>
+</li>
+</ul>
+<h3 id="cudaLaunchHostFunc-——-Stream-回调（Host-回调函数）"><a href="#cudaLaunchHostFunc-——-Stream-回调（Host-回调函数）" class="headerlink" title="cudaLaunchHostFunc () —— Stream 回调（Host 回调函数）"></a>cudaLaunchHostFunc () —— Stream 回调（Host 回调函数）</h3><p><strong>把一段 CPU 主机函数，插入 CUDA 流的任务队列。等这个流前面所有 GPU 任务全部执行完毕之后，自动执行这个主机回调函数。</strong><br>旧 API <code>cudaStreamAddCallback()</code> 已经废弃，现在用 <code>cudaLaunchHostFunc()</code>。</p>
+<ul>
+<li>可以定义一个<strong>主机端 CPU 函数</strong>，把这个函数作为一个任务，放进 CUDA 流队列。(流队列里可以放三类任务：<code>cudaMemcpyAsync</code>、kernel 启动、<strong>host 主机回调</strong>。)</li>
+<li>遵守流语义：<strong>流是串行队列</strong>，回调函数必须等到<strong>该流前面所有任务全部执行完成</strong>，才会触发执行。</li>
+<li>回调函数<strong>不是在你自己的 CPU 主线程执行</strong>，而是由 GPU 驱动单独创建的驱动线程来跑这个主机函数。</li>
+<li>最重要限制：回调函数内部不能调用任何 CUDA Runtime API，也不能启动 kernel！<ul>
+<li>禁止：<code>cudaMalloc</code> &#x2F; <code>cudaMemcpy</code> &#x2F; <code>cudaStreamSynchronize</code> &#x2F; 启动核函数</li>
+<li>原因：驱动线程环境不支持 CUDA Runtime，调用会出错死锁。</li>
+<li>回调里面只能写普通 CPU 逻辑：比如标记任务完成、设置 flag、通知别的线程、日志打印。</li>
+<li>适用场景：<strong>延迟 CPU 工作，等 GPU 计算结果就绪之后，再执行 CPU 后续处理</strong>。</li>
+<li>新代码统一使用<code>cudaLaunchHostFunc()</code>这个新API</li>
+</ul>
+</li>
+</ul>
+<p>伪代码示例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 回调函数，普通CPU函数，不能调用cuda runtime</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">host_callback</span><span class="params">(<span class="type">void</span>* data)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;GPU任务全部完成，执行主机回调\n&quot;</span>);</span><br><span class="line">    <span class="comment">// 仅普通CPU逻辑，禁止cuda API</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    cudaStream_t stream;</span><br><span class="line">    <span class="built_in">cudaStreamCreate</span>(&amp;stream);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// GPU任务入队</span></span><br><span class="line">    <span class="built_in">cudaMemcpyAsync</span>(... , stream);</span><br><span class="line">    MyKernel&lt;&lt;&lt;... , stream&gt;&gt;&gt;(...);</span><br><span class="line">    <span class="built_in">cudaMemcpyAsync</span>(... , stream);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将主机回调插入流队列，排在上面任务之后</span></span><br><span class="line">    <span class="built_in">cudaLaunchHostFunc</span>(stream, host_callback, <span class="literal">nullptr</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 主线程可以继续做别的工作，不会阻塞</span></span><br><span class="line">    <span class="comment">// 等流前面GPU任务跑完，驱动线程自动调用host_callback</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">cudaStreamDestroy</span>(stream);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="统一内存（Managed-Memory）下的拷贝计算重叠（按需分页-demand-paging）"><a href="#统一内存（Managed-Memory）下的拷贝计算重叠（按需分页-demand-paging）" class="headerlink" title="统一内存（Managed Memory）下的拷贝计算重叠（按需分页 demand-paging）"></a>统一内存（Managed Memory）下的拷贝计算重叠（按需分页 demand-paging）</h3><p>Managed Memory &#x3D; Unified Memory 统一内存，由<code>cudaMallocManaged()</code>分配，CPU&#x2F;GPU 共用一套虚拟地址；底层按需分页 demand-paging。</p>
+<ul>
+<li>整体流水线思路和普通多流拷贝计算重叠<strong>一样</strong>；<br>区别：不用<code>cudaMemcpyAsync</code>显式拷贝，改用 <strong><code>cudaMemPrefetchAsync()</code></strong> 预取统一内存页面。<ul>
+<li><code>cudaMemPrefetchAsync</code>：<strong>异步地把统一内存的数据页面迁移到指定设备（GPU&#x2F;CPU）</strong>，放到流中执行。</li>
+</ul>
+</li>
+<li>遵守流语义：页面迁移（内存搬迁）会按照流队列顺序执行，保证先后次序。<ul>
+<li>放在同一个流里：prefetch → kernel，一定等页面迁移完成，kernel 才启动。</li>
+</ul>
+</li>
+<li><code>cudaMemPrefetchAsync</code>比普通<code>cudaMemcpyAsync</code>工作量更大：它不只是搬数据，<strong>还要更新 CPU、GPU 两端的页表（page table）</strong>。<ul>
+<li>cudaMemcpyAsync：单纯数据拷贝，地址是独立的 host&#x2F;device 内存</li>
+<li>cudaMemPrefetchAsync：数据拷贝 + 修改两边页表映射关系</li>
+</ul>
+</li>
+<li>这个函数<strong>主机端函数返回会慢很多</strong>（不是指 GPU 任务，是 host 调用这个 API 本身），会在时序上引入意料之外的空隙，破坏拷贝计算重叠。<ul>
+<li>⚠️ 普通 async 函数：入队后立刻返回；<br>cudaMemPrefetchAsync 因为要操作页表，host 侧开销大，阻塞主机线程一段时间，流水线出现空档。</li>
+</ul>
+</li>
+<li>繁忙流 (busy stream) 和空闲流 (idle stream) 行为不一样。反直觉结论：<strong>负载满的 busy 流，吞吐反而更好</strong>。<ul>
+<li>简单理解：流队列已经有很多任务时，驱动可以把页表更新、页面迁移和已有任务调度重叠；空闲流下 prefetch 的页表开销更容易暴露出来，拖慢性能。</li>
+</ul>
+</li>
+</ul>
+<h4 id="统一内存是什么"><a href="#统一内存是什么" class="headerlink" title="统一内存是什么"></a>统一内存是什么</h4><p><strong>统一内存 &#x3D; CPU 与 GPU 共享同一套虚拟地址空间，同一个指针，CPU、GPU 都可以读写</strong>，底层页面会自动在主机内存和 GPU 显存之间迁移。</p>
+<ul>
+<li>核心原理：按需分页 demand-paging（Pascal 架构之后）<ol>
+<li>刚分配内存时，页面不一定在 CPU 或 GPU；</li>
+<li>CPU&#x2F;GPU 第一次访问这个内存，如果页面不在当前设备 → <strong>触发缺页 fault</strong>；</li>
+<li>CUDA 运行时自动把对应的内存页面迁移过来，然后继续执行；</li>
+</ol>
+</li>
+</ul>
+<blockquote>
+<p>这个自动迁移就叫 demand-paging 按需分页。</p>
+</blockquote>
+<ul>
+<li><p>两个关键 API</p>
+<ol>
+<li><strong><code>cudaMemPrefetchAsync()</code></strong><br><strong>主动预取页面</strong>，提前把页面迁移到 GPU（或 CPU），放到流里异步执行，避免 kernel 运行时发生缺页，缺页会造成巨大延迟，性能下降，尤其是当大量页面并发缺页，触发 fault 的那个 warp 暂停等待 PCIe 传输。</li>
+</ol>
+<blockquote>
+<p>做 copy-compute overlap 时，用它替代<code>cudaMemcpyAsync</code>。<br>缺点：不仅搬数据，<strong>还要更新 CPU 和 GPU 两端页表</strong>，host 调用开销更大，容易产生流水线间隙。</p>
+</blockquote>
+<ol start="2">
+<li><code>cudaMemAdvise()</code>：给驱动提示内存访问模式（比如数据主要给 GPU 读），辅助优化页面迁移策略。</li>
+</ol>
+</li>
+<li><p>优点</p>
+<ol>
+<li><strong>简化代码</strong>：省去大量<code>cudaMemcpy</code>，不用管理 host、device 两块内存。</li>
+<li><strong>支持显存超订阅（oversubscription）</strong>：数据集大小 &gt; GPU 物理显存。GPU 需要的时候，页面自动从系统内存换入换出，可以跑超出显存容量的任务。</li>
+<li>同一个指针，CPU&#x2F;GPU 都能访问，写代码更直观。</li>
+</ol>
+</li>
+</ul>
+<h3 id="cudaEvent-事件"><a href="#cudaEvent-事件" class="headerlink" title="cudaEvent 事件"></a>cudaEvent 事件</h3><p>cudaEvent 是可以放到流队列里的标记 marker；跟着流顺序执行，流跑到这个 event 位置时，event 完成。两大用途：GPU 计时、流之间同步。</p>
+<ul>
+<li>cudaEvent 是一个标记，<strong>插入 CUDA 流的任务队列</strong>，和 kernel、cudaMemcpyAsync 一样排队。</li>
+<li>调用<code>cudaEventRecord()</code>，就是<strong>把这个事件标记提交（record 录制）进流</strong>，只是入队，<strong>不是立刻记录时间</strong>。</li>
+<li>等流执行一路跑到这个 marker 位置，GPU 才真正打上时间戳 → event <strong>completed（完成）</strong>。（&gt; 流语义：流前面所有任务执行完，才触发这个 event。）</li>
+<li>最常用：<strong>给 GPU 设备任务计时</strong>（kernel、异步拷贝耗时）</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cudaEvent_t start, stop;</span><br><span class="line"><span class="built_in">cudaEventCreate</span>(&amp;start);   <span class="comment">// 创建事件对象，必须先创建才能用</span></span><br><span class="line"><span class="built_in">cudaEventCreate</span>(&amp;stop);</span><br><span class="line"></span><br><span class="line"><span class="built_in">cudaEventRecord</span>(start);    <span class="comment">// 把start标记提交到默认流，入队</span></span><br><span class="line">Kernel&lt;&lt;&lt;b, t&gt;&gt;&gt;(...);     <span class="comment">// GPU任务</span></span><br><span class="line"><span class="built_in">cudaEventRecord</span>(stop);      <span class="comment">// 把stop标记入队，排在kernel后面</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cudaEventSynchronize</span>(stop); <span class="comment">// CPU阻塞等待，直到stop事件完成（GPU跑完kernel）</span></span><br><span class="line"><span class="built_in">cudaEventElapsedTime</span>(&amp;float_var, start, stop); <span class="comment">// 计算start~stop之间耗时，单位ms</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>除计时外，还可以做<strong>跨流同步</strong>：</p>
+<ul>
+<li>比如 streamA 提交 event；streamB 调用<code>cudaStreamWaitEvent()</code>，让 streamB 等待这个 event 完成之后，才执行后面任务。用来搭建复杂多流并发流水线。</li>
+</ul>
+</li>
+<li><p>event 记录的是<strong>GPU 设备任务时间</strong>，<strong>不统计 CPU 主机代码耗时</strong>；复杂多流并发场景下，计时结果容易不符合预期。</p>
+</li>
+</ul>
+<h2 id="Multi-GPU-多-GPU-设备管理"><a href="#Multi-GPU-多-GPU-设备管理" class="headerlink" title="Multi-GPU 多 GPU 设备管理"></a>Multi-GPU 多 GPU 设备管理</h2><ul>
+<li><p>CUDA 多设备管理 API 只是底层 GPU 控制接口，<strong>不是并行编程框架</strong>。多 GPU 大规模并行，通常还是要搭配 MPI；OpenMP 用于 CPU 多线程。</p>
+</li>
+<li><p>程序查询、选择 GPU</p>
+<ul>
+<li><code>cudaGetDeviceCount(int *count)</code>：查询本机一共有多少块可用 GPU，结果存入 count。</li>
+<li><code>cudaSetDevice(int device)</code>：<strong>设置当前线程的活动 GPU（当前设备）</strong>。<blockquote>
+<p>后续<code>cudaMalloc</code>、kernel 启动、流创建等 CUDA 操作，默认都作用在这个 device 上。</p>
+</blockquote>
+</li>
+<li><code>cudaGetDevice(int *device)</code>：查询当前线程正在使用哪一块 GPU，设备号写入 device。</li>
+<li><code>cudaGetDeviceProperties(cudaDeviceProp *prop, int device)</code>：获取指定 GPU 的硬件信息（SM 数量、显存大小、warp 特性等）。</li>
+</ul>
+</li>
+<li><p>多个 CPU 主机线程，可以<strong>共享同一张 GPU</strong>。多个 host 线程往同一个 GPU 提交任务（kernel、拷贝），驱动负责调度。</p>
+</li>
+<li><p>单个 CPU 主线程，可以管理多张 GPU</p>
+<ul>
+<li>使用 <code>cudaSetDevice(i)</code> 在不同 GPU 之间来回切换当前设备。</li>
+<li><code>cudaMemcpyPeerAsync(...)</code>：<strong>GPU 点对点异步拷贝（Peer-to-Peer）</strong>，直接在两张 GPU 显存之间传输数据，<strong>不需要经过主机内存</strong>。前提：硬件开启 P2P 访问支持。</li>
+</ul>
+</li>
+</ul>
+<h3 id="P2P"><a href="#P2P" class="headerlink" title="P2P"></a>P2P</h3><ul>
+<li>Peer-to-Peer，GPU 点对点访问</li>
+<li>支持 P2P 的多张 GPU，可以直接访问对方显存，数据传输不需要经过 CPU 主机内存</li>
+</ul>
+<h3 id="MPI"><a href="#MPI" class="headerlink" title="MPI"></a>MPI</h3><p>MPI 是一套跨节点并行编程标准，基于「消息传递」，用来在多台服务器 &#x2F; 多个进程之间收发数据；常用于大规模集群、多机多 GPU 场景，它不是 CUDA 的一部分。</p>
+<ul>
+<li><p>MPI 采用<strong>进程并行</strong>：启动很多独立进程（MPI rank）</p>
+<ul>
+<li>每个 rank 是独立操作系统进程，<strong>有独立地址空间</strong></li>
+<li>进程之间不能直接访问对方内存，只能<strong>显式发送、接收消息</strong>来交换数据</li>
+<li>rank 可以跑在<strong>同一台机器</strong>，也可以分布在<strong>不同服务器节点</strong></li>
+<li>MPI<strong>只负责进程间通信</strong>，不做 GPU 计算；GPU 计算仍然交给 CUDA kernel。</li>
+</ul>
+<blockquote>
+<p>和线程（OpenMP）对比：</p>
+<ul>
+<li>OpenMP：<strong>共享内存</strong>，一台机器内，多线程共用同一块内存；</li>
+<li>MPI：<strong>分布式内存</strong>，进程内存互相隔离，靠消息传数据。</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<ol>
+<li><strong>单机多 GPU</strong>：只用 CUDA Runtime（<code>cudaSetDevice</code>、P2P）就能管理；</li>
+<li><strong>多机多 GPU（跨服务器）</strong>：CUDA P2P 只能单机内，跨机器显存不能直接访问 → <strong>必须 MPI</strong>。</li>
+</ol>
+<blockquote>
+<p>经典组合：<strong>MPI + CUDA</strong><br>每台服务器上启动 1 个 MPI 进程，进程绑定本机一张 GPU；MPI 负责<strong>服务器之间的数据交换</strong>，CUDA 负责本 GPU 内部计算。</p>
+</blockquote>
+<ul>
+<li><p>常用API:</p>
+<ul>
+<li><code>MPI_Init()</code>：初始化 MPI 环境</li>
+<li><code>MPI_Comm_rank()</code>：获取当前进程编号 rank</li>
+<li><code>MPI_Comm_size()</code>：获取总共有多少 MPI 进程</li>
+<li><code>MPI_Send()</code>：发送消息</li>
+<li><code>MPI_Recv()</code>：接收消息</li>
+<li><code>MPI_Finalize()</code>：结束 MPI</li>
+</ul>
+</li>
+</ul>
+<h3 id="OpenMP"><a href="#OpenMP" class="headerlink" title="OpenMP"></a>OpenMP</h3><p>OpenMP 是共享内存并行编程标准，用于单机内 CPU 多核并行；基于多线程，多个线程共享同一块主机内存，通过编译制导指令<code>#pragma omp</code>开启并行。(所有 OpenMP 线程在同一个进程内，共享进程全局内存；线程之间可以直接读写同一块变量)</p>
+<ul>
+<li><p>和 MPI、CUDA 的定位区分：</p>
+<ul>
+<li>OpenMP：<strong>单机 CPU 多核，共享内存、多线程</strong></li>
+<li>MPI：多进程，分布式内存，跨服务器集群</li>
+<li>CUDA：GPU 并行（设备端 SIMT 线程）</li>
+</ul>
+</li>
+<li><p>OpenMP 采用<strong>Fork-Join（分支 - 归并）模型</strong></p>
+<ol>
+<li>程序一开始只有<strong>主线程</strong>运行；</li>
+<li>遇到<code>#pragma omp parallel</code>，主线程 fork，生成一组子线程；</li>
+<li>多个线程并行执行任务；</li>
+<li>并行区域结束，所有子线程合并（join），回到单主线程继续往下跑。</li>
+</ol>
+</li>
+</ul>
+<h3 id="CUDA-Runtime（CUDA-运行时-API）"><a href="#CUDA-Runtime（CUDA-运行时-API）" class="headerlink" title="CUDA Runtime（CUDA 运行时 API）"></a>CUDA Runtime（CUDA 运行时 API）</h3><ul>
+<li><p>CUDA Runtime 是高层主机端 C&#x2F;C++ 库，封装底层 CUDA Driver API；提供一系列<code>cudaXXX</code>开头函数，用来管理 GPU、显存、流、事件，并且支持<code>Kernel&lt;&lt;&lt;grid, block&gt;&gt;&gt;</code>这种核函数启动语法。</p>
+</li>
+<li><p>区分：底层叫 <strong>CUDA Driver API</strong>（函数前缀<code>cuXXX</code>），Runtime 是建立在 Driver 之上的高层封装。</p>
+</li>
+</ul>
+<ol>
+<li><strong>执行位置：Host（CPU 主机端）</strong><br>所有<code>cudaXXX()</code>函数都在 CPU 上执行，<strong>不能在 GPU kernel 内部调用 Runtime 函数</strong>。作用是向 GPU 提交任务、管理 GPU 资源。</li>
+<li><strong>自动初始化</strong><br>Runtime 在<strong>第一次调用 cuda 函数时自动初始化 CUDA 环境</strong>，不需要手动初始化；<br>Driver API 必须手动调用<code>cuInit()</code>初始化。</li>
+<li><strong>提供的功能（就是前面学的）</strong></li>
+</ol>
+<ul>
+<li>设备管理：<code>cudaGetDeviceCount</code>、<code>cudaSetDevice</code>、<code>cudaGetDeviceProperties</code></li>
+<li>内存管理：<code>cudaMalloc</code>、<code>cudaFree</code>、<code>cudaMallocManaged</code>统一内存、<code>cudaMemcpy</code>、<code>cudaMemcpyPeerAsync</code></li>
+<li>流与事件：<code>cudaStreamCreate</code>、<code>cudaEventCreate</code>、<code>cudaEventRecord</code>，用于 GPU 计时、异步同步</li>
+<li>启动 kernel：<code>kernel&lt;&lt;&lt;grid,block&gt;&gt;&gt;</code> 这个三角括号语法，<strong>依赖 Runtime 实现</strong></li>
+</ul>
+<h3 id="Multi-GPU-Streams（多-GPU-下的-CUDA-流）"><a href="#Multi-GPU-Streams（多-GPU-下的-CUDA-流）" class="headerlink" title="Multi-GPU - Streams（多 GPU 下的 CUDA 流）"></a>Multi-GPU - Streams（多 GPU 下的 CUDA 流）</h3><p>流（stream）和 cudaEvent 在创建的时候，就自动绑定到当前<code>cudaSetDevice</code>选中的 GPU 设备；不同 GPU 的流可以通过 event 实现跨设备同步，不同 GPU 上的 kernel 可以并发执行。</p>
+<ul>
+<li><p>流和 cudaEvent 会<strong>隐式自动绑定设备</strong><br>当你调用<code>cudaStreamCreate</code> &#x2F; <code>cudaEventCreate</code>时，<strong>当前<code>cudaSetDevice</code>选中的设备，就是这个流 &#x2F; 事件永久绑定的 GPU</strong>。流一旦创建，所属设备不能更改。</p>
+</li>
+<li><p>每一块 GPU，都拥有<strong>独立的默认流（default stream）</strong></p>
+</li>
+<li><p>如果向一个不属于当前设备的流提交 kernel，启动会失败！</p>
+</li>
+<li><p><code>cudaStreamWaitEvent()</code>：<strong>可以实现跨设备流同步</strong>！,例如：GPU1 的流等待 GPU0 上记录的 event。即使 event 在别的 GPU，也能做设备间同步。</p>
+</li>
+<li><p><code>cudaEventQuery()</code>：非阻塞查询，检查 event 是否已经完成（不会卡住 CPU）。</p>
+</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaSetDevice</span>(<span class="number">0</span>);</span><br><span class="line"><span class="built_in">cudaStreamCreate</span>(&amp;stream0);  <span class="comment">// stream0绑定device0</span></span><br><span class="line"><span class="built_in">cudaSetDevice</span>(<span class="number">1</span>);</span><br><span class="line"><span class="built_in">cudaStreamCreate</span>(&amp;stream1);  <span class="comment">// stream1绑定device1</span></span><br><span class="line"></span><br><span class="line">Kernel&lt;&lt;&lt;b, t, <span class="number">0</span>, stream1&gt;&gt;&gt;(...); <span class="comment">// 在device1的stream1提交kernel</span></span><br><span class="line"><span class="built_in">cudaSetDevice</span>(<span class="number">0</span>);</span><br><span class="line">Kernel&lt;&lt;&lt;b, t, <span class="number">0</span>, stream0&gt;&gt;&gt;(...); <span class="comment">// 在device0的stream0提交kernel</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Multi-GPU：Device-to-Device-设备间数据拷贝（P2P-GPUDirect）"><a href="#Multi-GPU：Device-to-Device-设备间数据拷贝（P2P-GPUDirect）" class="headerlink" title="Multi-GPU：Device-to-Device 设备间数据拷贝（P2P&#x2F;GPUDirect）"></a>Multi-GPU：Device-to-Device 设备间数据拷贝（P2P&#x2F;GPUDirect）</h3><p>如果硬件拓扑支持，GPU 之间可以通过 PCIe&#x2F;NVLink 直接传输显存数据，不走主机内存；需要先建立双向 Peer 对等关系，之后用<code>cudaMemcpyPeerAsync</code>完成 P2P 异步拷贝，也就是 GPUDirect P2P。</p>
+<ul>
+<li><p>系统硬件拓扑支持时，GPU 之间可以通过 PCIe 或者 NVLink 高速互联，<strong>直接把显存数据从一张 GPU 传到另一张</strong>。(NVLink 是 NVIDIA 更高带宽的专用互联，比 PCIe 速度更快)</p>
+</li>
+<li><p>设备必须<strong>显式建立 peer 对等关系（称为 clique 对等组）</strong>，P2P 才可以生效，不是默认开启。</p>
+</li>
+<li><p>如果双向都要互相访问，<strong>两个方向都要分别 enable</strong>：</p>
+<ul>
+<li>开启 GPU0 可以访问 GPU1</li>
+<li>开启 GPU1 可以访问 GPU0<br>只开单向，只能单向拷贝。</li>
+</ul>
+</li>
+<li><p>建立 P2P 之后，两张 GPU 之间拷贝<strong>不再需要经过主机系统内存做中转</strong>，这就是 GPUDirect P2P 传输。 </p>
+</li>
+<li><p>无 P2P 时：GPU0 → Host 内存 → GPU1（两次 PCIe 传输）</p>
+</li>
+<li><p>有 P2P 时：GPU0 ↔ GPU1，直接传输，绕过主机内存。</p>
+</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cudaSetDevice</span>(<span class="number">0</span>);</span><br><span class="line"><span class="built_in">cudaDeviceCanAccessPeer</span>(&amp;canPeer, <span class="number">0</span>, <span class="number">1</span>); <span class="comment">// 检测：设备0能否P2P访问设备1</span></span><br><span class="line"><span class="built_in">cudaDeviceEnablePeerAccess</span>(<span class="number">1</span>, <span class="number">0</span>);        <span class="comment">// 开启：device0可以访问device1</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cudaSetDevice</span>(<span class="number">1</span>);</span><br><span class="line"><span class="built_in">cudaDeviceEnablePeerAccess</span>(<span class="number">0</span>, <span class="number">0</span>);        <span class="comment">// 开启：device1可以访问device0（双向启用）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 异步P2P拷贝：从device1的src_ptr拷贝size字节到device0的dst_ptr，在stream0执行</span></span><br><span class="line"><span class="built_in">cudaMemcpyPeerAsync</span>(dst_ptr, <span class="number">0</span>, src_ptr, <span class="number">1</span>, size, stream0);</span><br><span class="line"></span><br><span class="line"><span class="built_in">cudaDeviceDisablePeerAccess</span>(<span class="number">0</span>);          <span class="comment">// 关闭：device1不再把device0作为peer</span></span><br></pre></td></tr></table></figure>
+
+<p><code>cudaDeviceEnablePeerAccess(peerDevice, flags)</code></p>
+<blockquote>
+<p><strong>第一个参数：你想要访问的那个对端设备号；第二个参数永远传 0（flags，保留参数，目前没有其他选项）</strong></p>
+</blockquote>
+<ul>
+<li>对等组<code>clique</code>内，<strong>可同时建立 P2P 连接的 GPU 数量有硬件上限</strong>，不能无限多卡全部互相 P2P。</li>
+</ul>
+<h3 id="其它并发场景"><a href="#其它并发场景" class="headerlink" title="其它并发场景"></a>其它并发场景</h3><p>CUDA 有两种典型并发：<strong>Host&#x2F;Device 并发（CPU 主机代码 和 GPU 核函数重叠执行）</strong>；<strong>同卡多 Kernel 并发（同一个 GPU 上，多个不同流的 kernel 同时跑）</strong></p>
+<ul>
+<li>Host &#x2F; Device execution concurrency 主机 &#x2F; 设备并发</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Kernel&lt;&lt;&lt;b, t&gt;&gt;&gt;(...);   <span class="comment">// GPU上执行kernel</span></span><br><span class="line"><span class="built_in">cpuFunction</span>(...);        <span class="comment">// CPU上执行主机函数</span></span><br><span class="line"><span class="comment">// kernel的执行可以和主机代码cpuFunction重叠并行</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Concurrent kernels 同设备多 Kernel 并发（同一个 GPU 上多个 kernel 并行）</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Kernel&lt;&lt;&lt;b, t, <span class="number">0</span>, streamA&gt;&gt;&gt;(...); <span class="comment">// 提交到streamA</span></span><br><span class="line">Kernel&lt;&lt;&lt;b, t, <span class="number">0</span>, streamB&gt;&gt;&gt;(...); <span class="comment">// 提交到streamB</span></span><br><span class="line"><span class="comment">// 这两个kernel有机会并发执行</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>实际开发里，<strong>在同一块 GPU 上看到多个 kernel 同时跑并不容易</strong>。</li>
+<li>要求 kernel 占用<strong>寄存器、共享内存等硬件资源少</strong>，并且执行时间足够长。</li>
+<li>单块 GPU 能够<strong>同时并发执行的 kernel 数量存在硬件上限</strong>，不能无限并发。</li>
+<li>多个 kernel 并发的效率，<strong>不如用一个大 kernel 把 GPU 硬件占满</strong>。GPU 的设计思路：尽量单 kernel 充分利用全部 SM。</li>
+</ul>
+<h3 id="CUDA-流优先级"><a href="#CUDA-流优先级" class="headerlink" title="CUDA 流优先级"></a>CUDA 流优先级</h3><p>CUDA 流可以设置优先级，<strong>只对并发执行的 Kernel 生效</strong>；GPU 调度器会优先调度高优先级流里的线程块；当前硬件一般只有高低 2 档优先级，<strong>不支持抢占（block 一旦开始执行就不能被打断）</strong>。</p>
+<ul>
+<li>CUDA 流支持可选地定义优先级。创建流的时候，可以指定优先级。</li>
+<li>流优先级只影响并发运行的 kernel(如果两个 kernel 不是并发（串行排队执行），流优先级<strong>不起任何作用</strong>。只有多个 kernel 同时在 GPU 上跑的时候，优先级才生效。)</li>
+<li>GPU 的 Block 调度器，<strong>会尽量优先调度高优先级流中的线程块，再调度低优先级流的 Block</strong>。</li>
+<li>当前硬件实现一般只提供<strong>2 档优先级：高、低</strong>。</li>
+<li><strong>不支持 Block 抢占！</strong></li>
+</ul>
+<blockquote>
+<p>含义：<strong>一个 block 一旦在 SM 上启动运行，就不会被高优先级任务打断</strong>。<br>优先级只能影响<strong>还没开始调度的 block</strong>；已经跑起来的 block 会一直执行完成。</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> priority_high, priority_low;</span><br><span class="line"><span class="comment">// 获取当前GPU支持的流优先级范围</span></span><br><span class="line"><span class="built_in">cudaDeviceGetStreamPriorityRange</span>(&amp;priority_low, &amp;priority_high);</span><br><span class="line"></span><br><span class="line">cudaStream_t st_high, st_low;</span><br><span class="line"><span class="comment">// 创建非阻塞的高优先级流</span></span><br><span class="line"><span class="built_in">cudaStreamCreateWithPriority</span>(&amp;st_high, cudaStreamNonBlocking, priority_high);</span><br><span class="line"><span class="comment">// 创建非阻塞的低优先级流</span></span><br><span class="line"><span class="built_in">cudaStreamCreateWithPriority</span>(&amp;st_low, cudaStreamNonBlocking, priority_low);</span><br></pre></td></tr></table></figure>
+
+<h3 id="CUDA-Graphs-概述（CUDA-图"><a href="#CUDA-Graphs-概述（CUDA-图" class="headerlink" title="CUDA Graphs 概述（CUDA 图)"></a>CUDA Graphs 概述（CUDA 图)</h3><p>CUDA Graph 是 CUDA10 引入的特性，把一系列 GPU 任务（kernel、内存拷贝等）组织成有依赖关系的图结构，<strong>提前一次性构建好，之后可以反复提交到流上执行，减少 CPU 反复提交任务的开销</strong>。</p>
+<ul>
+<li><p>CUDA 10 版本新增功能。</p>
+</li>
+<li><p>可以定义流上的一系列任务：核函数、内存拷贝、回调、主机函数，甚至可以嵌套子图。</p>
+</li>
+<li><p>每一项任务，都是图里的<strong>节点 node</strong>。</p>
+</li>
+<li><p>可以定义节点之间的依赖关系，例如：3 个节点全部完成之后，下一个节点才允许开始执行。</p>
+</li>
+<li><p>任务依赖关系，对应图的<strong>边 edge</strong>。</p>
+</li>
+<li><p>图一旦构建完成，把整个图一次性提交到流中执行。</p>
+</li>
+<li><p>构建好的图可以<strong>重复多次执行</strong>，适合循环执行固定任务序列（深度学习推理就是典型场景）。</p>
+</li>
+<li><p>两种创建图的方式：</p>
+<ul>
+<li><strong>手动构建（manual）</strong>：逐个创建 node、手动添加依赖边</li>
+<li><strong>捕获模式（stream capture）</strong>：直接捕获一段流里提交的任务，自动生成 graph（更常用）</li>
+</ul>
+</li>
+</ul>
+<h1 id=""><a href="#" class="headerlink" title=""></a></h1>
       
     </div>
 
@@ -883,12 +1367,16 @@
       
           <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
 <h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+
 <p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
 <h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+
 <p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
 <h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+
 <p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
 <h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+
 <p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
 
       

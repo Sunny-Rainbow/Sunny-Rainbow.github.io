@@ -246,16 +246,15 @@
         <h1 id="03-·-验证码服务篇（VarifyServer-）"><a href="#03-·-验证码服务篇（VarifyServer-）" class="headerlink" title="03 · 验证码服务篇（VarifyServer/）"></a>03 · 验证码服务篇（<code>VarifyServer/</code>）</h1><p>VarifyServer 是 <strong>Node.js gRPC 微服务</strong>：只负责「生成验证码 → 写 Redis → 发邮件」。<br>不直接对 Qt 开放，只被 GateServer 调用。</p>
 <hr>
 <h2 id="一、模块联系"><a href="#一、模块联系" class="headerlink" title="一、模块联系"></a>一、模块联系</h2><h3 id="1-1-关系总图"><a href="#1-1-关系总图" class="headerlink" title="1.1 关系总图"></a>1.1 关系总图</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">GateServer (C++ gRPC Client)</span><br><span class="line">        │  GetVarifyCode(&#123; email &#125;)</span><br><span class="line">        ▼</span><br><span class="line">server.js  ──addService──► VarifyService</span><br><span class="line">        │</span><br><span class="line">        ├─ redis.js   Get / Set+Expire   → Redis  key = code_&lt;email&gt;</span><br><span class="line">        ├─ email.js   SendMail           → SMTP（如 163）</span><br><span class="line">        ├─ config.js  ← config.json      邮箱账号、Redis 地址</span><br><span class="line">        ├─ const.js   code_prefix / Errors</span><br><span class="line">        └─ proto.js   ← message.proto    加载 gRPC 服务定义</span><br></pre></td></tr></table></figure>
-<h3 id="1-2-协作要点"><a href="#1-2-协作要点" class="headerlink" title="1.2 协作要点"></a>1.2 协作要点</h3><div class="table-container">
-<table>
+
+<h3 id="1-2-协作要点"><a href="#1-2-协作要点" class="headerlink" title="1.2 协作要点"></a>1.2 协作要点</h3><table>
 <thead>
 <tr>
 <th>关系</th>
 <th>说明</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td>Gate ↔ Varify</td>
 <td>仅 gRPC，端口默认 <code>50051</code></td>
 </tr>
@@ -271,20 +270,16 @@
 <td>与 MySQL</td>
 <td>本服务当前发码路径不写 MySQL</td>
 </tr>
-</tbody>
-</table>
-</div>
+</tbody></table>
 <hr>
-<h2 id="二、各模块功能"><a href="#二、各模块功能" class="headerlink" title="二、各模块功能"></a>二、各模块功能</h2><div class="table-container">
-<table>
+<h2 id="二、各模块功能"><a href="#二、各模块功能" class="headerlink" title="二、各模块功能"></a>二、各模块功能</h2><table>
 <thead>
 <tr>
 <th>文件</th>
 <th>功能</th>
 </tr>
 </thead>
-<tbody>
-<tr>
+<tbody><tr>
 <td><code>server.js</code></td>
 <td>入口；实现 <code>GetVarifyCode</code>；绑定 <code>0.0.0.0:50051</code></td>
 </tr>
@@ -298,31 +293,31 @@
 </tr>
 <tr>
 <td><code>redis.js</code></td>
-<td>ioredis：<code>GetRedis</code> / <code>SetRedisExpire</code></td>
+<td>ioredis：<code>GetRedis</code> &#x2F; <code>SetRedisExpire</code></td>
 </tr>
 <tr>
 <td><code>email.js</code></td>
 <td>nodemailer 创建 transport 并 <code>sendMail</code></td>
 </tr>
 <tr>
-<td><code>config.js</code> / <code>config.json</code></td>
+<td><code>config.js</code> &#x2F; <code>config.json</code></td>
 <td>邮箱、Redis 等配置</td>
 </tr>
 <tr>
 <td><code>const.js</code></td>
-<td><code>code_ = &quot;code_&quot;</code>；错误码 Success/RedisErr/Exception</td>
+<td><code>code_ = &quot;code_&quot;</code>；错误码 Success&#x2F;RedisErr&#x2F;Exception</td>
 </tr>
 <tr>
 <td><code>package.json</code></td>
 <td>依赖与 <code>npm run serve</code></td>
 </tr>
-</tbody>
-</table>
-</div>
+</tbody></table>
 <h3 id="Redis-Key-约定"><a href="#Redis-Key-约定" class="headerlink" title="Redis Key 约定"></a>Redis Key 约定</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Key:   code_&lt;邮箱&gt;</span><br><span class="line">Value: 4 位验证码（来自 UUID 截断）</span><br><span class="line">TTL:   600 秒</span><br></pre></td></tr></table></figure>
+
 <p>GateServer 使用同一前缀宏：<code>CODEPREFIX &quot;code_&quot;</code>。</p>
 <hr>
 <h2 id="三、代码讲解"><a href="#三、代码讲解" class="headerlink" title="三、代码讲解"></a>三、代码讲解</h2><h3 id="3-1-启动-gRPC-服务"><a href="#3-1-启动-gRPC-服务" class="headerlink" title="3.1 启动 gRPC 服务"></a>3.1 启动 gRPC 服务</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">main</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> server = <span class="keyword">new</span> grpc.<span class="title class_">Server</span>()</span><br><span class="line">    server.<span class="title function_">addService</span>(message_proto.<span class="property">VarifyService</span>.<span class="property">service</span>, &#123;</span><br><span class="line">        <span class="title class_">GetVarifyCode</span>: <span class="title class_">GetVarifyCode</span></span><br><span class="line">    &#125;)</span><br><span class="line">    server.<span class="title function_">bindAsync</span>(<span class="string">&#x27;0.0.0.0:50051&#x27;</span>,</span><br><span class="line">        grpc.<span class="property">ServerCredentials</span>.<span class="title function_">createInsecure</span>(), <span class="function">() =&gt;</span> &#123;</span><br><span class="line">            server.<span class="title function_">start</span>()</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;grpc server started&#x27;</span>)</span><br><span class="line">        &#125;)</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">main</span>()</span><br></pre></td></tr></table></figure>
+
 <p><strong>说明：</strong></p>
 <ul>
 <li><code>addService</code>：把 RPC 名映射到本地函数。</li>
@@ -331,6 +326,7 @@
 </ul>
 <hr>
 <h3 id="3-2-GetVarifyCode-主流程"><a href="#3-2-GetVarifyCode-主流程" class="headerlink" title="3.2 GetVarifyCode 主流程"></a>3.2 GetVarifyCode 主流程</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">GetVarifyCode</span>(<span class="params">call, callback</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;email is &quot;</span>, call.<span class="property">request</span>.<span class="property">email</span>)</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> query_res = <span class="keyword">await</span> redis_module.<span class="title class_">GetRedis</span>(</span><br><span class="line">            const_module.<span class="property">code_prefix</span> + call.<span class="property">request</span>.<span class="property">email</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> uniqueId = query_res;</span><br><span class="line">        <span class="keyword">if</span> (query_res == <span class="literal">null</span>) &#123;</span><br><span class="line">            uniqueId = <span class="title function_">uuidv4</span>();</span><br><span class="line">            <span class="keyword">if</span> (uniqueId.<span class="property">length</span> &gt; <span class="number">4</span>)</span><br><span class="line">                uniqueId = uniqueId.<span class="title function_">substring</span>(<span class="number">0</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">let</span> bres = <span class="keyword">await</span> redis_module.<span class="title class_">SetRedisExpire</span>(</span><br><span class="line">                const_module.<span class="property">code_prefix</span> + call.<span class="property">request</span>.<span class="property">email</span>,</span><br><span class="line">                uniqueId, <span class="number">600</span>);</span><br><span class="line">            <span class="keyword">if</span> (!bres) &#123;</span><br><span class="line">                <span class="title function_">callback</span>(<span class="literal">null</span>, &#123;</span><br><span class="line">                    <span class="attr">email</span>: call.<span class="property">request</span>.<span class="property">email</span>,</span><br><span class="line">                    <span class="attr">error</span>: const_module.<span class="property">Errors</span>.<span class="property">RedisErr</span></span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">let</span> mailOptions = &#123;</span><br><span class="line">            <span class="attr">from</span>: config_module.<span class="property">email_user</span>,</span><br><span class="line">            <span class="attr">to</span>: call.<span class="property">request</span>.<span class="property">email</span>,</span><br><span class="line">            <span class="attr">subject</span>: <span class="string">&#x27;验证码&#x27;</span>,</span><br><span class="line">            <span class="attr">text</span>: <span class="string">&#x27;您的验证码为&#x27;</span> + uniqueId + <span class="string">&#x27;请三分钟内完成注册&#x27;</span>,</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">await</span> emailModule.<span class="title class_">SendMail</span>(mailOptions);</span><br><span class="line"></span><br><span class="line">        <span class="title function_">callback</span>(<span class="literal">null</span>, &#123;</span><br><span class="line">            <span class="attr">email</span>: call.<span class="property">request</span>.<span class="property">email</span>,</span><br><span class="line">            <span class="attr">error</span>: const_module.<span class="property">Errors</span>.<span class="property">Success</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">        <span class="title function_">callback</span>(<span class="literal">null</span>, &#123;</span><br><span class="line">            <span class="attr">email</span>: call.<span class="property">request</span>.<span class="property">email</span>,</span><br><span class="line">            <span class="attr">error</span>: const_module.<span class="property">Errors</span>.<span class="property">Exception</span></span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p><strong>逐步理解：</strong></p>
 <ol>
 <li>先查 Redis：若已有未过期验证码 → <strong>复用</strong>（避免刷接口一直换码）。  </li>
@@ -341,13 +337,15 @@
 </ol>
 <hr>
 <h3 id="3-3-Redis-封装"><a href="#3-3-Redis-封装" class="headerlink" title="3.3 Redis 封装"></a>3.3 Redis 封装</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// redis.js（结构示意）</span></span><br><span class="line"><span class="keyword">const</span> <span class="title class_">RedisCli</span> = <span class="keyword">new</span> <span class="title class_">Redis</span>(&#123;</span><br><span class="line">  <span class="attr">host</span>: config_module.<span class="property">redis_host</span>,</span><br><span class="line">  <span class="attr">port</span>: config_module.<span class="property">redis_port</span>,</span><br><span class="line">  <span class="attr">password</span>: config_module.<span class="property">redis_passwd</span>,</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">GetRedis</span>(<span class="params">key</span>) &#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> result = <span class="keyword">await</span> <span class="title class_">RedisCli</span>.<span class="title function_">get</span>(key);</span><br><span class="line">    <span class="keyword">return</span> result; <span class="comment">// 不存在则为 null</span></span><br><span class="line">  &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">SetRedisExpire</span>(<span class="params">key, value, exptime</span>) &#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">await</span> <span class="title class_">RedisCli</span>.<span class="title function_">set</span>(key, value);</span><br><span class="line">    <span class="keyword">await</span> <span class="title class_">RedisCli</span>.<span class="title function_">expire</span>(key, exptime);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125; <span class="keyword">catch</span> (error) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p><strong>学习注意：</strong></p>
 <ul>
 <li>若在 <code>error</code> 回调里调用 <code>quit()</code>，连接会永久关闭，后续全是 <code>Connection is closed</code>。  </li>
-<li>本地 Redis 端口/密码必须与 <code>config.json</code> 一致（本项目常用 <code>6380</code>）。</li>
+<li>本地 Redis 端口&#x2F;密码必须与 <code>config.json</code> 一致（本项目常用 <code>6380</code>）。</li>
 </ul>
 <hr>
 <h3 id="3-4-发邮件"><a href="#3-4-发邮件" class="headerlink" title="3.4 发邮件"></a>3.4 发邮件</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// email.js 思路</span></span><br><span class="line"><span class="keyword">let</span> transport = nodemailer.<span class="title function_">createTransport</span>(&#123;</span><br><span class="line">    <span class="attr">host</span>: <span class="string">&quot;smtp.163.com&quot;</span>,</span><br><span class="line">    <span class="attr">port</span>: <span class="number">465</span>,</span><br><span class="line">    <span class="attr">secure</span>: <span class="literal">true</span>,</span><br><span class="line">    <span class="attr">auth</span>: &#123;</span><br><span class="line">        <span class="attr">user</span>: config_module.<span class="property">email_user</span>,</span><br><span class="line">        <span class="attr">pass</span>: config_module.<span class="property">email_pass</span>,  <span class="comment">// 授权码，不是登录密码</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="keyword">await</span> transport.<span class="title function_">sendMail</span>(mailOptions);</span><br></pre></td></tr></table></figure>
+
 <p><strong>说明：</strong></p>
 <ul>
 <li>163 等邮箱需开启 SMTP 并使用<strong>授权码</strong>。  </li>
@@ -355,6 +353,7 @@
 </ul>
 <hr>
 <h3 id="3-5-Proto-契约"><a href="#3-5-Proto-契约" class="headerlink" title="3.5 Proto 契约"></a>3.5 Proto 契约</h3><figure class="highlight protobuf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">service </span><span class="title class_">VarifyService</span> &#123;</span><br><span class="line">  <span class="function"><span class="keyword">rpc</span> GetVarifyCode (GetVarifyReq) <span class="keyword">returns</span> (GetVarifyRsp) </span>&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">message </span><span class="title class_">GetVarifyReq</span> &#123;</span><br><span class="line">  <span class="type">string</span> email = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">message </span><span class="title class_">GetVarifyRsp</span> &#123;</span><br><span class="line">  <span class="type">int32</span> error = <span class="number">1</span>;</span><br><span class="line">  <span class="type">string</span> email = <span class="number">2</span>;</span><br><span class="line">  <span class="type">string</span> code = <span class="number">3</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>Gate 侧 C++ 与 Node 侧必须用<strong>同一套</strong> proto（或兼容字段编号），否则会联调失败。</p>
 <hr>
 <h2 id="四、验证码服务自测清单"><a href="#四、验证码服务自测清单" class="headerlink" title="四、验证码服务自测清单"></a>四、验证码服务自测清单</h2><ol>
@@ -365,7 +364,7 @@
 <li>邮箱是否收到 4 位验证码？</li>
 </ol>
 <hr>
-<p>上一篇：<a href="./02-网关篇.md">02-网关篇</a><br>下一篇：<a href="./04-状态服务篇.md">04-状态服务篇</a></p>
+<p>上一篇：<a href="./02-%E7%BD%91%E5%85%B3%E7%AF%87.md">02-网关篇</a><br>下一篇：<a href="./04-%E7%8A%B6%E6%80%81%E6%9C%8D%E5%8A%A1%E7%AF%87.md">04-状态服务篇</a></p>
 
     </div>
 
